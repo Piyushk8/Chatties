@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { useSelector } from "react-redux";
  import { motion } from "framer-motion";
  import userAvatar from "../../assets/userAvatar.jpg";
+import { timeAgo } from "../../lib/helper";
 
 const ChatItem = ({
   selected,
@@ -18,7 +19,9 @@ const ChatItem = ({
   index = 0,
   handleDeleteChat,
 }) => {
+  const lastSeenTime = timeAgo(lastSeen)
   if(!avatar) avatar = userAvatar
+  
   return (
     <Link
       to={`/chat/${_id}`}
@@ -42,7 +45,7 @@ const ChatItem = ({
         <div>
         <div className="flex gap-4 ">
           <span className="self-start text-xs  text-slate-500 overflow-hidden whitespace-nowrap text-ellipsis">{name} </span>
-          <div className=" text-[10px]  text-slate-500 overflow-hidden whitespace-nowrap text-ellipsis">* 11 days ago</div>
+          <div className=" text-[8.5px]  text-slate-500 overflow-hidden whitespace-nowrap text-ellipsis">{lastSeenTime}</div>
         </div>
         <div className=" text-sm text-gray-900 text-ellipsis overflow-y-hidden overflow-x-hidden h-6 ">
            {"~"} {lastMessage}

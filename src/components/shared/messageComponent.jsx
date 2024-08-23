@@ -1,14 +1,14 @@
 import React from 'react'
-// import { fileFormat } from '../../lib/features'
-// import RenderContent from './RenderContent'
+ import { fileFormat } from '../../lib/feature'
+ import RenderContent from './RenderComponent'
 import { useSelector } from 'react-redux'
 import moment from 'moment';
 
 const MessageComponent = ({user,message }) => {
-   const {sender,content , attachments=[],createdAt} = message
+   const {sender,content , attachment=[],createdAt} = message
    const sameSender = sender.id === user?.id
     const  timeAgo = moment(createdAt).fromNow();
-    
+    console.log(attachment?.length)
   return (
     <div style={{
         alignSelf:sameSender ? "flex-end":"flex-start",
@@ -21,16 +21,16 @@ const MessageComponent = ({user,message }) => {
         {content ? <div>{content}</div> : ""}
         <div className='py-1 ' >
         {
-            attachments.length>0  && attachments.map((attachment,index)=>{
-            const url = attachment.url;
+            attachment?.length>0  && attachment?.map((attachment,index)=>{
+            const url = attachment;
             const file =fileFormat(url);
             // console.log(RenderContent(url,file));
             return ( 
-                <Box key={index}>
+                <div key={index}>
                     <a href='' target='_blank' download  style={{color:"black"}} >
                         {RenderContent({url,file})}
                     </a> 
-                </Box>);
+                </div>);
             })
         }
         </div>

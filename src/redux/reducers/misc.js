@@ -21,8 +21,8 @@ const miscSlice = createSlice({
     setIsSearch: (state, action) => {
       state.isSearch = action.payload;
     },
-    setIsFileMenu: (state, action) => {
-      state.isFileMenu = action.payload;
+    setIsFileMenu: (state) => {
+      state.isFileMenu = !state.isFileMenu
     },
     setIsDeleteMenu: (state, action) => {
       state.isDeleteMenu = action.payload;

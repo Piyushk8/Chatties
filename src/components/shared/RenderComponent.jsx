@@ -1,17 +1,21 @@
 import React from 'react'
-import { transformImage } from '../../lib/features';
-import { FileOpen } from '@mui/icons-material';
+const transformImage = (url = "", width = 100) => {
+  const newUrl = url.replace("upload/", `upload/dpr_auto/w_${width}/`);
+
+  return newUrl;
+};
+
 
 const RenderContent = ({file,url}) => {
   
     switch (file){
         case "video":
-            return <video preload='none' width={"200px"} controls src={url}/>
+            return <video preload='none' width={"100px"} controls src={url}/>
             
         case "image":
             return ( <img 
-                width={"200px"}
-                height={"150px"}
+                width={"150px"}
+                height={"100px"}
                 style={{objectFit:"contain"}}
                 src={transformImage(url)} alt='atatchemnt'></img>
             );
@@ -37,3 +41,4 @@ const RenderContent = ({file,url}) => {
 
  
 }
+export default RenderContent;

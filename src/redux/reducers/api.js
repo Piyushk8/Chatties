@@ -87,4 +87,8 @@ const api = createApi({
     })
 })
 export default api
-export const  {useCreateChatMutation,useChatDetailsQuery,useGetMessagesQuery,useMyChatsQuery} = api;
+export const  {useCreateChatMutation
+    ,useChatDetailsQuery,
+    useGetMessagesQuery,
+    useMyChatsQuery,
+useSendAttachmentsMutation} = api;

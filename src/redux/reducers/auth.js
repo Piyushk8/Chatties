@@ -5,7 +5,9 @@ export const authSlice = createSlice({
   initialState: {
     user: null,
     Loader:true
+    ,isAuthenticated:false
   },
+
   reducers: {
     userExists:(state,action)=>{
         state.user=action.payload
@@ -14,10 +16,14 @@ export const authSlice = createSlice({
     userNotExists:(state)=>{
         state.user=null,
         state.Loader=false
-    }
+    },
+    setIsAuthenticated:(state,action)=>{
+        state.isAuthenticated=action.payload
+    },
+
   },
 });
 
-export const { userExists,userNotExists } = authSlice.actions;
+export const { setIsAuthenticated, userExists,userNotExists } = authSlice.actions;
 
 export default authSlice.reducer;

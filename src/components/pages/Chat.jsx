@@ -8,24 +8,22 @@ import {ALERT,NEW_MESSAGE,NEW_MESSAGE_ALERT,IS_TYPING,STOP_TYPING} from "../../c
 import { useSocketEvents } from "../../hooks/hook"
 import {getSocket} from "../../socket"
 import { useDispatch, useSelector } from 'react-redux'
-import { setUserTyping } from '../../redux/reducers/misc'
-import TypingAnimation from '../shared/typingAnimation'
+import { setIsFileMenu, setUserTyping } from '../../redux/reducers/misc'
 import Header from '../Layout/Header'
+import FileMenu from '../specific/FileMenu'
 const Chat = ({chatId,user}) => {
   const socket = getSocket()
   const [page, setpage] = useState(1)
   const [message, setMessage] = useState("")
   const [messages, setMessages] = useState([])
   const [MeTyping, setMeTyping] = useState(false)
-  // const [Usertyping, setUsertyping] = useState(false)
   const typingtimeOut = useRef(null)
   const dispatch = useDispatch();
   
-
   const containerRef = useRef(null)
   const fileMenuRef = useRef(null)
   const bottomRef = useRef(null)
-  const {userTyping} = useSelector((state)=>state.misc)
+  const {userTyping ,isFileMenu} = useSelector((state)=>state.misc)
 
   const {data,isLoading
     ,isError,error
@@ -47,7 +45,6 @@ const Chat = ({chatId,user}) => {
     setpage,
     data?.messages
   )
- // console.log(oldMessages,"oldmessages")
 
 
 
@@ -58,7 +55,7 @@ const SubmitHandler = (e)=>{
   e.preventDefault();
   if(!message.trim()) return;
    //to emit message to server
-   console.log(message,"newmeesage")
+ 
   socket.emit(NEW_MESSAGE,{chatId , members ,message})
   setMessage("")
   }
@@ -77,6 +74,10 @@ const SubmitHandler = (e)=>{
         }, 1500);
         
       }
+      const openFileMenu =()=>{
+        dispatch(setIsFileMenu())
+      }
+    
       
       //!Event listner handlers
       const isTypingListener = useCallback((data) => {
@@ -151,7 +152,7 @@ const SubmitHandler = (e)=>{
 {/* chat area */}
    
 
-      <div ref={containerRef} className='flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-orange-400 pr-2 md:pr-20'>
+      <div ref={containerRef} className='flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-orange-400 pl-1 pr-2 md:pr-20'>
        {
          oldMessages?.map((message,index)=>{
           return <MessageComponent key={index} user={user} message={message}/>
@@ -164,25 +165,29 @@ const SubmitHandler = (e)=>{
         })
       }
       <div ref={bottomRef}> </div>
+              {isFileMenu && <FileMenu chatId={chatId} fileMenuRef={fileMenuRef} />}
       </div>
 
 {/* send message area */}
-      <div className=' w-full'>
+      <div className=' w-full bg-slate-200'>
         <form onSubmit={SubmitHandler} className='flex flex-col justify-center h-full w-full'>
-        <div className='flex p-2 relative  justify-around w-full '>
+        <div className='flex gap-1 p-2 relative items-center justify-around w-full '>
             
+ 
+            <div className='flex gap-1 w-full items-center relative' ref={fileMenuRef}>
               <input type="text"
                placeholder='send...' 
-               className='border-none bg-slate-200 rounded-xl  pl-2 h-10 w-[90%]'
+               className='border-none bg-slate-100 rounded-xl  pl-2 h-10 w-[90%]'
                onChange={MessageOnChange}
                value={message}
+               
                />
-
-            <div className='' ref={fileMenuRef}>
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-5">
-              <path strokeLinecap="round" strokeLinejoin="round"  
-              d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
-            </svg>
+                 <div className='' ref={fileMenuRef} onClick={openFileMenu}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
+                    <path strokeLinecap="round" strokeLinejoin="round"  
+                    d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+                  </svg>
+                  </div>
             </div>
             <div onClick={SubmitHandler} >
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">

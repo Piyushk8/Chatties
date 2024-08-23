@@ -10,7 +10,8 @@ import {I_AM_OFFLINE, I_AM_ONLINE, NEW_MESSAGE, NEW_MESSAGE_ALERT, ONLINE_USER, 
 import { useSocketEvents } from '../../hooks/hook'
 const appLayout = () =>(WrappedComponent)=> {
   return (props)=>{
-    const socket = getSocket()
+    const {socket} = getSocket()
+    console.log(socket)
     const dispatch = useDispatch()
     const params = useParams();
     const chatId = params.chatId;
@@ -18,7 +19,7 @@ const appLayout = () =>(WrappedComponent)=> {
     //const onlineUsers = new Set()
     const {data,isLoading,isError,error,refetch} = useMyChatsQuery()
     const {user,Loader} = useSelector((state)=>state.auth) 
-    console.log(data)
+    
     const searchUser=()=>{
         e.preventDefault();
     }
@@ -37,19 +38,17 @@ const appLayout = () =>(WrappedComponent)=> {
     // useEffect(() => {
     //     console.log("Current online users:", onlineUsers);
     //   }, [onlineUsers])
-    const OnlineStatusChangeListener = useCallback(({userId,status})=>{
+    const OnlineStatusChangeListener = useCallback(({userId})=>{
         console.log("status")
-        // console.log(onlineUsers)
-        // setOnlineUsers(prev => {
-        //     if (status === 'online' && !prev.includes(userId)) {
-        //         return [...prev, userId];
-        //     } else if (status === 'offline') {
-        //         return prev.filter(id => id !== userId);
-        //     }
-        //     return prev;
-        // });
+     
+        setOnlineUsers(prev => {
+            if ( prev.includes(userId)) {
+                return prev.filter(id => id !== userId);
+            }
+            return prev;
+        });
         refetch()
-        
+        console.log("onlineuser",onlineUsers)
     },[])
     
     // console.log(onlineUsers,"onliine users")

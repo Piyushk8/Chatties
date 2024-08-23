@@ -39,12 +39,12 @@ export const useAsyncMutation = (mutationHook) => {
 export const useSocketEvents = (socket, handlers) => {
   useEffect(() => {
     Object.entries(handlers).forEach(([event, handler]) => {
-      socket.on(event, handler);
+      if(socket) socket.on(event, handler);
     });
 
     return () => {
       Object.entries(handlers).forEach(([event, handler]) => {
-        socket.off(event, handler);
+        if(socket) socket.off(event, handler);
       });
     };
   }, [socket, handlers]);

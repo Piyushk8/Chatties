@@ -1,4 +1,4 @@
-import {useState} from 'react'
+import {useEffect, useState} from 'react'
 
 const fontFamily = "belleza"; // Change to your desired font
 //import {useFileHandler, useInputValidation, useStrongPassword} from "6pp"
@@ -14,13 +14,17 @@ import userAvatar from   "../../assets/userAvatar.jpg"
 import { FaCamera } from 'react-icons/fa';
 import { fileToDataString } from '../../lib/helper';
 import axios from "axios";
-import { userExists } from '../../redux/reducers/auth';
+import { setIsAuthenticated, userExists } from '../../redux/reducers/auth';
+import { getSocket} from '../../socket';
 
 
 
  const Login = ()=> {
   const dispatch = useDispatch();
   const nav = useNavigate("/")
+  const socket = getSocket()
+  const {isAuthenticated } = useSelector((state)=>state.auth)
+ 
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [typeOfPassword, settypeOfPassword] = useState("password")
@@ -59,10 +63,16 @@ import { userExists } from '../../redux/reducers/auth';
           id: toastId,
         })
          console.log(data)
-        ;
+         if(data.success===true){
+          dispatch(setIsAuthenticated(true))
+         
+        //  useSocketReconnection(isAuthenticated)
+         }
         nav("/")
+
       } catch (error) {
-        toast.error(error?.response?.data?.message , {
+        console.log("error",error)
+        toast.error(error?.response?.message||"some error occured" , {
           id: toastId,
         });
       } finally {

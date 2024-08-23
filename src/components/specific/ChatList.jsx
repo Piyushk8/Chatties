@@ -11,8 +11,8 @@ const ChatList = ({
         }],
         handleDeleteChat
 }) => {
-  console.log(onlineUsers)
   const Chats =chatData?.transformedChat
+  //console.log(Chats)
   return (
     <div className='w-full h-full flex flex-col justify-start gap-5'>
         {
@@ -20,8 +20,8 @@ const ChatList = ({
             return <ChatItem
             selected={chatId===chat.chatId}
             lastMessage={chat?.chat?.lastMessage||""}
-            lastseen={chat?.chat?.lastsent}
-            isOnline={onlineUsers.includes(chat.user.id)} 
+            lastSeen={chat?.chat?.lastSent}
+            isOnline={onlineUsers?.includes(chat.user.id)} 
             index={index}
             key={index}
             avatar={chat?.user?.avatar} 
