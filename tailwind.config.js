@@ -10,5 +10,12 @@ export default {
   plugins: [
     require('tailwind-scrollbar'),
     require('tailwind-scrollbar-hide'),
+    require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/aspect-ratio'),
+    require('@tailwindcss/line-clamp'),
+    // Add the backdrop-filter plugin
+    //require('tailwindcss-filters'),
+
   ],
 }

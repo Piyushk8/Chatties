@@ -6,18 +6,16 @@ import moment from 'moment';
 
 const MessageComponent = ({user,message }) => {
    const {sender,content , attachment=[],createdAt} = message
-   const sameSender = sender.id === user?.id
+   const sameSender = sender?.id === user?.id
+   //console.log(sender)
     const  timeAgo = moment(createdAt).fromNow();
-    console.log(attachment?.length)
   return (
-    <div style={{
+    <div
+     style={{
+        marginBottom:"2px",    
         alignSelf:sameSender ? "flex-end":"flex-start",
-        borderRadius:"8px" ,
-        padding:"0.5rem"
-        ,width:"fit-content",
-        
-    }} className={`my-0.5 md:my-2  flex flex-col min-w-4 h-fit ${sameSender?`text-white bg-orange-500`:`bg-slate-200`}`}>
-
+    }} >
+        <div className={`p-3 rounded-lg  my-0.5 md:mt-2  flex flex-col min-w-4 min-h-11 h-fit ${sameSender?`text-white bg-[#EF6144]`:`bg-[#F6F6F6]`}`}>
         {content ? <div>{content}</div> : ""}
         <div className='py-1 ' >
         {
@@ -34,8 +32,9 @@ const MessageComponent = ({user,message }) => {
             })
         }
         </div>
-        <div className='self-end text-[8px] ${sameSender?`text-white bg-orange-500`:`bg-slate-200`}'>
-            {timeAgo}
+        </div>
+        <div className='self-end w-full h-fit text-[8px] p-0 bg-white text-[#B0B0B0] ${sameSender?`text-white bg-orange-500`:`bg-slate-200`}'>
+            read {timeAgo}
         </div>
     </div>
   )

@@ -44,12 +44,14 @@ export const SocketProvider = ({ children }) => {
   
   const connect = () => {
     if (!socket.connected) {
+      console.log("connection attempt")
       socket.connect();
     }
   };
 
   const disconnect = () => {
     if (socket.connected) {
+      console.log("disconnect")
       socket.disconnect();
     }
   };
@@ -68,7 +70,7 @@ export const SocketProvider = ({ children }) => {
 
   const value = {
     socket,
-    isAuthenticated,
+    // isAuthenticated,
     connect,
     disconnect,
   };

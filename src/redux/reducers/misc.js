@@ -12,6 +12,7 @@ const initialState = {
   chatIdContextMenu:null,
   userTyping:false,
   ProfileMenu:false
+  ,isChatList:false
 };
 
 const miscSlice = createSlice({
@@ -42,7 +43,13 @@ const miscSlice = createSlice({
         state.userTyping=action.payload
     },
     setProfileMenu:(state)=>{
-        state.userTyping=!state
+        state.ProfileMenu=!state
+    },
+    setIsChatList:(state)=>{
+        state.isChatList=!state.isChatList
+    },
+    closeChatList:(state)=>{
+        state.isChatList=false
     }
     
   },
@@ -50,6 +57,8 @@ const miscSlice = createSlice({
 
 export default miscSlice;
 export const {setProfileMenu,
+  closeChatList,
+  setIsChatList,
 setUserTyping,
   setIsSearch,
   setIsFileMenu,

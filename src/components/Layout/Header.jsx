@@ -1,11 +1,16 @@
 import React, { useRef, useState } from 'react'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
 import userAvatar from "../../assets/userAvatar.jpg"
+import axios from 'axios'
+import { server } from '../../constant/config'
+import toast from 'react-hot-toast'
+import { userNotExists } from '../../redux/reducers/auth'
 const Header = ({user}) => {
 const [isProfileOpen, setisProfileOpen] = useState(false)
 const {name ,avatar} = user;
 const ProfileRef = useRef(null)
 const imageRef = useRef(null)
+const dispatch = useDispatch()
   //const {user} = useSelector((state)=>state.auth)
   // const name = chatName.split("-")[0]
 
@@ -29,23 +34,40 @@ const imageRef = useRef(null)
     setIsModalOpen(false);
   };
 
-
+  const handleLogout=async()=>{
+    
+    try{const res =  await axios.delete(`${server}/api/v1/user/logout`,{withCredentials:true})
+    if(res.data.success==true) {
+      dispatch(userNotExists())
+      toast.success(res?.data?.message) }  
+  }catch(err){
+      console.log(err)
+    }
+  }
   const {userTyping }= useSelector((state)=>state.misc)
   return (<>
-    <header className='bg-slate-200 h-16 flex items-center pl-6 gap-5'>
-        <div class="avatar">
-        <div class=" w-10 rounded-full ">
-          <img ref={imageRef} onClick={handleClick} 
-            className="cursor-pointer rounded-full h-10 w-10" src={avatar?.url || userAvatar} />
-        </div>
-        </div>
+    <header className='bg-[#F6F6F6] h-[3.7rem] px-3 py-6 flex justify-between items-center pl-2 border-t-[1px] gap-5'>
+        <div className='flex items-center gap-3'>
+          <div class="avatar">
+          <div class=" w-10 rounded-full ">
+            <img ref={imageRef} onClick={handleClick} 
+              className="cursor-pointer rounded-full h-10 w-10" src={avatar?.url || userAvatar} />
+          </div>
+          </div>
 
-        <div className='flex-col justify-center'>
-            <div>{name}</div>
-            <div className='text-xs text-orange-500'>{userTyping ? "Typing...":""}</div>
+          <div className='ml-4 self-start flex-col justify-center'>
+              <div className='text-base font-semibold'>{name}</div>
+              <div className='text-sm font-medium  text-[#B0B0B0]'>{userTyping ? "Typing...":""}</div>
+          </div>
         </div>
+          <div onClick={handleLogout}  className='cursor-pointer pr-2'>
+          <span class="material-symbols-outlined">
+          logout
+          </span> 
+          <div className=' text-[9px] text-gray-500'>logout</div>
+          </div>
+          </header>
 
-    </header>
           { isProfileOpen && 
           
             <div ref={ProfileRef}  className='flex gap-5  flex-col justify-center items-center h-fit py-4 min-h-[10rem]  min-w-[20rem] bg-slate-100 transition-all duration-300 ease-in-out translate-y-16 mt-2 ml-2 absolute'  >
@@ -77,8 +99,8 @@ const imageRef = useRef(null)
                         &times;
                       </button>
                     </div>
-                  </div>
-                )}
+                  </div>)
+          }
             
 </> )
 }

@@ -12,7 +12,16 @@ const SearchInput = () => {
     const [isOpen, setIsOpen] = useState(false); // State to control dropdown visibility
     const [selectedItem, setselectedItem] = useState(-1)
     
-    const dropdownRef = useRef(null); // Ref to the dropdown container
+    const OptionRef = useRef(null); // Ref to the dropdown container
+    const InputRef = useRef(null); // Ref to the dropdown container
+
+
+    
+  window.addEventListener("click",(e)=>{
+    if(e.target !== OptionRef.current && e.target !==InputRef.current ){
+      setIsOpen(false)
+    }
+  })
 
     useEffect(() => {
         const fetchOptions = async () => {
@@ -43,7 +52,7 @@ const SearchInput = () => {
 
     // Toggle dropdown visibility
     const handleInputClick = () => {
-        setIsOpen((prev) => !prev);
+        setIsOpen(true);
     };
     const handleClearClick = () => {
         setQuery("");
@@ -66,14 +75,21 @@ const SearchInput = () => {
         setselectedItem(-1)
        }
     }
+    const inputOnChange = (e)=>{
+        e.preventDefault();
+        setQuery(e.target.value);
+        handleInputClick()
+    }
+
     return (
         <div className="relative w-full">
                         
             <input
+            ref={InputRef}
             type="text"
             value={query}
-            onClick={handleInputClick}
-            onChange={(e) => setQuery(e.target.value)}
+            // onClick={handleInputClick}
+            onChange={inputOnChange}
             className="w-full p-2 border border-gray-300 rounded"
             placeholder="Search..."
             onKeyDown={handleKeyDown}
@@ -95,11 +111,18 @@ const SearchInput = () => {
             </div>
             )}
             {options.length > 0 && (
-            <ul className="absolute scrollbar-none top-full w-[20rem] left-0 right-0 max-h-60 overflow-y-auto bg-white border border-t-0 border-gray-300 rounded-b z-10">
+
+            <div 
+                className="w-[16rem] hover:text-white bg-opacity-20 backdrop-blur-sm p-2 rounded-xl shadow-sm   absolute scrollbar-none top-full  left-0 right-0 max-h-[60rem] overflow-y-auto bg-white border border-t-0 border-gray-300 rounded-b z-10"
+                >
+            <ul 
+                ref={OptionRef}
+                >
                 {options.map((option, index) => (
                   <InputFieldItem selectedItem={selectedItem} option={option} index={index} />
                 ))}
             </ul>
+            </div>
             )}
 
 

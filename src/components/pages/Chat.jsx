@@ -12,7 +12,7 @@ import { setIsFileMenu, setUserTyping } from '../../redux/reducers/misc'
 import Header from '../Layout/Header'
 import FileMenu from '../specific/FileMenu'
 const Chat = ({chatId,user}) => {
-  const socket = getSocket()
+  const {socket} = getSocket()
   const [page, setpage] = useState(1)
   const [message, setMessage] = useState("")
   const [messages, setMessages] = useState([])
@@ -145,62 +145,67 @@ const SubmitHandler = (e)=>{
       
       return (<>
     {
-      isLoading ? <></> :<> 
-     {!chatDetailsLoading && <Header user={chatDetails?.members[0]?.user} /> } 
-
-      <div  className='flex flex-col overflow-hidden justify-between border-box  md:px-2 flex-1' style={{height:""}}> 
-{/* chat area */}
-   
-
-      <div ref={containerRef} className='flex flex-col overflow-y-auto scrollbar-thin scrollbar-thumb-orange-400 pl-1 pr-2 md:pr-20'>
-       {
-         oldMessages?.map((message,index)=>{
-          return <MessageComponent key={index} user={user} message={message}/>
-         })
+      isLoading ? <></> :
+      <div className='h-full w-full'> 
+          {!chatDetailsLoading && <Header user={chatDetails?.members[0]?.user} /> } 
         
-      }
-      {
-        messages?.map((message,index)=>{
-          return <MessageComponent key={index} user={user} message={message} ></MessageComponent>
-        })
-      }
-      <div ref={bottomRef}> </div>
-              {isFileMenu && <FileMenu chatId={chatId} fileMenuRef={fileMenuRef} />}
-      </div>
+        <div  className='flex flex-col justify-between border-box  flex-1 h-[calc(100%-4rem)]'> 
+  {/* chat area */}
+    
 
-{/* send message area */}
-      <div className=' w-full bg-slate-200'>
-        <form onSubmit={SubmitHandler} className='flex flex-col justify-center h-full w-full'>
-        <div className='flex gap-1 p-2 relative items-center justify-around w-full '>
-            
- 
-            <div className='flex gap-1 w-full items-center relative' ref={fileMenuRef}>
-              <input type="text"
-               placeholder='send...' 
-               className='border-none bg-slate-100 rounded-xl  pl-2 h-10 w-[90%]'
-               onChange={MessageOnChange}
-               value={message}
-               
-               />
-                 <div className='' ref={fileMenuRef} onClick={openFileMenu}>
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                    <path strokeLinecap="round" strokeLinejoin="round"  
-                    d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
-                  </svg>
-                  </div>
+        <div ref={containerRef} className='overflow-y-scroll flex flex-col scrollbar-thin scrollbar-thumb-orange-400 pl-1 pr-2 md:pr-8'>
+        {
+          oldMessages?.map((message,index)=>{
+            return <MessageComponent key={index} user={user} message={message}/>
+          })
+          
+        }
+        {
+          messages?.map((message,index)=>{
+            return <MessageComponent key={index} user={user} message={message} ></MessageComponent>
+          })
+        }
+        <div ref={bottomRef}> </div>
+                {isFileMenu && <FileMenu chatId={chatId} fileMenuRef={fileMenuRef} />}
+        </div>
+
+  {/* send message area */}
+        <div className=' w-full '>
+          <form onSubmit={SubmitHandler} className='flex flex-col justify-center h-full w-full'>
+          <div className='flex gap-1 py-5 px-6 relative items-center justify-around w-full '>
+              
+  
+              <div className='bg-[#F6F6F6] p-1 flex gap-1 w-full items-center relative' ref={fileMenuRef}>
+                <input type="text"
+                placeholder='send...' 
+                className='border-none bg-slate-100 rounded-xl  h-10 w-[90%]'
+                onChange={MessageOnChange}
+                value={message}
+                
+                />
+                  <div className='mr-1' ref={fileMenuRef} onClick={openFileMenu}>
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#EF6144" className="size-6">
+                      <path strokeLinecap="round" strokeLinejoin="round"  
+                      d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+                    </svg>
+                    </div>
+              <div onClick={SubmitHandler} className='bg-[#FEE7E2] p-1' >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#DC4A2D" className="size-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
+              </svg>
+
+              </div>
+              </div>
+
             </div>
-            <div onClick={SubmitHandler} >
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
-            </svg>
-
-            </div>
-
-          </div>
-         
-         </form>
+          
+          </form>
+        </div>
       </div>
-    </div></>
+     
+
+    
+    </div>
     }
     </>
   )

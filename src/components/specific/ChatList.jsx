@@ -11,13 +11,15 @@ const ChatList = ({
         }],
         handleDeleteChat
 }) => {
+ 
   const Chats =chatData?.transformedChat
   //console.log(Chats)
   return (
-    <div className='w-full h-full flex flex-col justify-start gap-5'>
-        {
+    <div className='w-full h-[calc(100%-2rem)] flex flex-col overflow-y-scroll scrollbar-thin scrollbar-thumb-zinc-500 scrollbar-corner-white justify-start gap-5'>
+         {
           Chats.map((chat,index)=> {
             return <ChatItem
+            handleDeleteChat={handleDeleteChat}
             selected={chatId===chat.chatId}
             lastMessage={chat?.chat?.lastMessage||""}
             lastSeen={chat?.chat?.lastSent}

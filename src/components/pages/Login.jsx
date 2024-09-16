@@ -63,9 +63,9 @@ import { getSocket} from '../../socket';
           id: toastId,
         })
          console.log(data)
-         if(data.success===true){
+         if(data?.success===true){
+           console.log(" authenticated")
           dispatch(setIsAuthenticated(true))
-         
         //  useSocketReconnection(isAuthenticated)
          }
         nav("/")
@@ -125,31 +125,31 @@ import { getSocket} from '../../socket';
  
   return (
     <div 
-    className='h-screen bg-black flex flex-col justify-center items-center  overflow-hidden w-screen'>
+    className='h-screen flex flex-col justify-center items-center  overflow-hidden w-screen'>
     <div>
 {/* login section */}
         {isLogin ?
-          <div className=" overflow-y-auto scrollbar-none flex flex-col justify-center p-8 space-y-6 bg-slate-200 shadow-md rounded-lg  ">
-            <h2 className="text-2xl font-bold text-center">Login</h2>
+          <div className=" overflow-y-auto scrollbar-none flex flex-col justify-center p-8 space-y-6 bg-[#FEF4F2]  shadow-2xl rounded-lg  ">
+            <h2 className="text-2xl font-bold text-center text-[gray]">Login</h2>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700">Username</label>
-                <input type="username" onChange={(e)=>setUserName(e.target.value)}  className="w-full px-4 py-2 mt-1 border rounded-md focus:ring focus:ring-indigo-300" />
+                <label className="block text-sm font-medium text-[#B0B0B0]">Username</label>
+                <input type="username" placeholder='Piyushk8' onChange={(e)=>setUserName(e.target.value)}  className="w-full px-4 py-2 mt-1  rounded-md  focus:none" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700">Password</label>
-                <input onChange={(e)=>setPassword(e.target.value)}  type="password" className="w-full px-4 py-2 mt-1 border rounded-md focus:ring focus:ring-indigo-300" />
+                <label className="block text-sm font-medium text-[#B0B0B0]">Password</label>
+                <input placeholder='12345' onChange={(e)=>setPassword(e.target.value)}  type="password" className="w-full focus:outline-none focus:shadow-none hover:outline-none hover:shadow-none active:outline-none active:shadow-none  px-4 py-2 mt-1  rounded-md " />
               </div>
-              <button  type="submit" className="w-full px-4 py-2 font-bold text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
+              <button  type="submit" className="w-full px-4 py-2 font-bold text-white bg-[#EF6144] rounded-3xl hover:bg-orange-500">
                 Login
               </button>
             </form>
-            <p className='self-center'>New user? <p className='inline ' onClick={()=>setIsLogin(false)}>create account</p></p>
+            <p className='self-center text-[#B0B0B0]' >New user? <p className='inline text-[#EF6144] ' onClick={()=>setIsLogin(false)}>create account</p></p>
           </div>
         :
-//Signup section 
-        <div className="overflow-y-auto scrollbar-none flex flex-col w-full max-w-md  p-8 space-y-6 bg-slate-300 shadow-md rounded-lg sm:max-w-sm md:max-w-lg lg:max-w-xl xl:max-w-2xl">
-        <h2 className="text-2xl font-bold text-center">Sign up</h2>
+//Signup section text-[#B0B0B0]">Already user? <p className='inline text-[#EF6144]'
+        <div className="overflow-y-auto scrollbar-none flex flex-col w-full max-w-md  p-8 space-y-6 bg-[#FEF4F2] shadow-2xl rounded-lg sm:max-w-sm md:max-w-lg lg:max-w-xl xl:max-w-2xl">
+        <h2 className="text-2xl font-bold text-center text-[gray] ">SIGN UP</h2>
         <form className="space-y-4 " onSubmit={handleSignUp}>
           <div className=" Avatar flex flex-col">
              
@@ -175,22 +175,22 @@ import { getSocket} from '../../socket';
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700">Username</label>
+            <label className="block text-sm font-medium text-[#B0B0B0]">Username</label>
             <input onChange={(e)=>setUserName(e.target.value)} type="username" className="w-full px-4 py-2 mt-1 border rounded-md focus:ring focus:ring-indigo-300" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Name</label>
+            <label className="block text-sm font-medium text-[#B0B0B0]">Name</label>
             <input onChange={(e)=>setName(e.target.value)} type="name" className="w-full px-4 py-2 mt-1 border rounded-md focus:ring focus:ring-indigo-300" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700">Password</label>
-            <input onChange={(e)=>setPassword(e.target.value)} type="password" className="w-full px-4 py-2 mt-1 border rounded-md focus:ring focus:ring-indigo-300" />
+            <label className="block text-sm font-medium text-[#B0B0B0]">Password</label>
+            <input onChange={(e)=>setPassword(e.target.value)} type="password" className="w-full px-4 py-2 mt-1  rounded-md " />
           </div>
-          <button type="submit" className="w-full px-4 py-2 font-bold text-white bg-indigo-600 rounded-md hover:bg-indigo-700">
-            Sign up
+          <button type="submit" className="w-full px-4 py-2 font-bold text-white rounded-3xl bg-[#EF6144] hover:bg-orange-500">
+                Sign up
           </button>
         </form>
-        <p className="self-center">Already user? <p className='inline ' onClick={()=>setIsLogin(true)}>Sign In</p></p>
+        <p className="self-center text-[#B0B0B0]">Already user? <p className='inline text-[#EF6144]' onClick={()=>setIsLogin(true)}>Sign In</p></p>
           
       </div>
         

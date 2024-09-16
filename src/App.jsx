@@ -1,19 +1,18 @@
-import React, { Suspense, useEffect } from 'react'
+import React, { lazy, Suspense, useEffect } from 'react'
 import {Route,Routes,BrowserRouter} from "react-router-dom"
-import Home from './components/pages/Home'
-
 import { SocketProvider } from './socket'
-
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import { server } from './constant/config'
 import { setIsAuthenticated, userExists, userNotExists } from './redux/reducers/auth'
 import { Toaster } from 'react-hot-toast'
 import ProtectRoute from './components/auth/ProtectRoute'
-import { FaSpinner } from 'react-icons/fa'
-import Chat from './components/pages/Chat'
-import { Login } from './components/pages/Login'
+import MainLoader from './components/Layout/MainLoader'
 
+import { Login } from './components/pages/Login'
+//const {Login} = lazy(()=>import('./components/pages/Login'))
+const Chat = lazy(()=>import('./components/pages/Chat'))
+const Home = lazy(()=>import('./components/pages/Home'))
 
 const App = () => {
   const {user,Loader} = useSelector((state)=>state.auth)
@@ -25,11 +24,13 @@ const App = () => {
     }).then((res)=>{
       dispatch(setIsAuthenticated(true))
       return dispatch(userExists(res.data.user))
-    }).catch((err)=>dispatch(userNotExists()))
+    }).catch((err)=>{
+      dispatch(setIsAuthenticated(false))
+      dispatch(userNotExists())})
   },[dispatch])
 
   return Loader ? (
-   "ehllo"
+   <MainLoader/>
   ) : (
     <BrowserRouter>
         <SocketProvider>
