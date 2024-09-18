@@ -41,34 +41,36 @@ const ChatItem = ({
         initial={{ opacity: 0, y: '-100%' }}
         whileInView={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 * index }}
-        className={`flex gap-3 h-16`}
+        className={`flex justify-between gap-3 h-16`}
       >
-      
-      <div class="avatar">
-        <div class={` shadow-lg  ring-offset-base-100 w-12 h-12 rounded-full ${isOnline && "ring shadow-orange-300 ring-orange-300 ring-offset-2"} `}>
-          <img className="rounded-full h-12 w-12"  src={`${avatar.url||avatar}`} />
-        </div>
-       
-      </div>
-        <div>
-        <div className="flex gap-4 ">
-          <span className="self-start text-xs font-bold  text-[#212121] overflow-hidden whitespace-nowrap text-ellipsis">{name} </span>
-          <div className=" text-[9px]  text-[#B0B0B0] overflow-hidden whitespace-nowrap text-ellipsis">{lastSeenTime}</div>
-        </div>
-        <div className=" text-sm h-11  text-[#454545] text-ellipsis overflow-y-hidden overflow-x-hidden  ">
-           {"~"} {lastMessage}
-          </div>
-        
-        </div>
-       {
-        pinnedChats?.includes(_id) &&  <div className="">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="size-5">
-        <path stroke-linecap="sharp" stroke-linejoin="sharp" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
-        </svg>
+      {/* avatar div */}
+       <div className="flex gap-3">
+          <div class="avatar">
+              <div class={` shadow-lg  ring-offset-base-100 w-12 h-12 rounded-full ${isOnline && "ring shadow-orange-300 ring-orange-300 ring-offset-2"} `}>
+                <img className="rounded-full h-12 w-12"  src={`${avatar.url||avatar}`} />
+              </div>
+            
+            </div>
+            <div>
+            <div className="flex gap-4 ">
+              <span className="self-start text-xs font-bold  text-[#212121] overflow-hidden whitespace-nowrap text-ellipsis">{name} </span>
+              <div className=" text-[9px]  text-[#B0B0B0] overflow-hidden whitespace-nowrap text-ellipsis">{lastSeenTime}</div>
+            </div>
+            <div className=" text-sm h-11  text-[#454545] text-ellipsis overflow-y-hidden overflow-x-hidden  ">
+              {"~"} {lastMessage}
+              </div>
+            </div>
 
-      </div>
-       }
-        
+       </div>
+        {
+          pinnedChats?.includes(_id) &&  <div className="">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="size-5">
+          <path stroke-linecap="sharp" stroke-linejoin="sharp" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+          </svg>
+
+        </div>
+        }
+     
        {/* <DeleteChatMenu/> */}
         
       </motion.div>

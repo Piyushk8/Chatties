@@ -1,6 +1,7 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import ChatItem from '../shared/chatItem'
-import { useSelector } from 'react-redux'
+import { useDispatch, useSelector } from 'react-redux'
+import { setChatSelection } from '../../redux/reducers/chat'
 
 const ChatList = ({
     chatData,
@@ -12,58 +13,83 @@ const ChatList = ({
         }],
         handleDeleteChat
 }) => {
+  //hooks
+  const  dispatch = useDispatch()
+  const {chatSelection,pinnedChats }= useSelector((state)=>state.chat)
  
-  const chats =chatData?.transformedChat
+  //states 
+  const [chats, setChats] = useState([])
 
-
-  let sortedChats = chats
-   //to sort the chats when pinned
-   const {pinnedChats }= useSelector((state)=>state.chat)
-    if(chats){
-      //console.log(chats)
-      const pinchat = chats?.filter((i)=>pinnedChats.includes(i.chatId))
-      const nonPinchat = chats?.filter((i)=>!pinnedChats.includes(i.chatId))
-      console.log(pinchat,nonPinchat)
-    sortedChats = [...pinchat,...nonPinchat]
+  // sort chat logic
+  useEffect(() => {
+    if (chatSelection === 'all' && chatData?.transformedChat) {
+    allHandler()
     }
+  }, [chatSelection,pinnedChats]);
+
+
+      const allHandler = ()=>{
+        console.log('all handler')
+        const allChats = chatData.transformedChat;
+
+        const pinnedChatsArray = allChats.filter((i) => pinnedChats.includes(i.chatId));
+        const nonPinnedChatsArray = allChats.filter((i) => !pinnedChats.includes(i.chatId));
+  
+        setChats([...pinnedChatsArray, ...nonPinnedChatsArray]); // This will only setChats when chatData changes
+      
+      }
+      const recentHandler = ()=>{
+        dispatch(chatSelection("all"))
+      }
+      const favHandler = ()=>{
+        console.log("favorite ")
+        dispatch(setChatSelection("Favorites"))
+        const allChats = chatData.transformedChat;
+        const favChats = allChats?.filter((i)=>pinnedChats?.includes(i.chatId))
+        setChats(favChats)
+        
+      }
+
+
+  //button hanlders
+  const buttonHandlers = {"all":allHandler,"Recent":allHandler,"Favorites":favHandler}
+
 
   //console.log(Chats)
   return (
-    <div className='w-full h-[calc(100%-2rem)] flex flex-col overflow-y-scroll scrollbar-thin scrollbar-thumb-zinc-500 scrollbar-corner-white justify-start gap-5'>
+    <>
+    <div className="pt-3  box-border  scrollbar-hide flex flex-row gap-4 pl-5 whitespace-nowrap">
+          {['all', 'Recent', 'Favorites'].map((button) => (
+            <button
+              key={button}
+              id={button}
+              onClick={buttonHandlers[button]}
+              className="border bg-[#FEF4F2] border-[#FCB4A5] text-[#DC4A2D] font-semibold text-xs rounded-full hover:bg-[#EF6144] hover:text-white px-2 focus:outline-none focus:bg-[#EF6144] focus:text-white active:bg-[#EF6144] active:text-white transition duration-150 ease-in-out"
+            >
+              {button}
+            </button>
+          ))}
+        </div>
+    <div className='w-full h-[calc(100%-2rem) flex flex-col overflow-y-scroll scrollbar-hide justify-start gap-5'>
          {
-          sortedChats.map((chat,index)=> {
-            return <ChatItem
-            handleDeleteChat={handleDeleteChat}
-            selected={chatId===chat.chatId}
-            lastMessage={chat?.chat?.lastMessage||""}
-            lastSeen={chat?.chat?.lastSent}
-            isOnline={onlineUsers?.includes(chat.user.id)} 
-            index={index}
-            key={index}
-            avatar={chat?.user?.avatar} 
-            name={chat?.user.name}
-            _id={chat?.chatId}
-            > </ChatItem>
-          })
+           chats.map((chat,index)=> {
+             return <ChatItem
+             handleDeleteChat={handleDeleteChat}
+             selected={chatId===chat.chatId}
+             lastMessage={chat?.chat?.lastMessage||""}
+             lastSeen={chat?.chat?.lastSent}
+             isOnline={onlineUsers?.includes(chat.user.id)} 
+             index={index}
+             key={index}
+             avatar={chat?.user?.avatar} 
+             name={chat?.user.name}
+             _id={chat?.chatId}
+             > </ChatItem>
+            })
 }
-{/* <div
-         ref={dialogRef}
-          
-          style={{
-            position: 'fixed',
-            left: `${dialogRef.pageX}`,
-            top: `${dialogRef.pageY}`,
-            //transform: 'translate(-50%, -50%)', // Optional for centering
-          }}
-          className="bg-white shadow-lg rounded p-4 z-50"
-        >
-          <ul>
-            <li className="hover:bg-gray-200 p-2 cursor-pointer">Pin Chat </li>
-            <li className="hover:bg-gray-200 p-2 cursor-pointer">Mute Chat </li>
-            <li className="hover:bg-gray-200 p-2 cursor-pointer">Delete Chat </li>
-          </ul>
-        </div> */}
+
     </div>
+          </>
   )
 }
 

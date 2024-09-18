@@ -4,7 +4,7 @@ const initialState = {
   //notificationCount: 0,
   
   pinnedChats:[]
-  ,
+  ,chatSelection:"all"
  
   
 };
@@ -24,11 +24,15 @@ const chatSlice = createSlice({
      state.pinnedChats =  state.pinnedChats.filter((i)=>i!==action.payload)
       
     }}
+    ,setChatSelection:(state,action)=>{
+      state.chatSelection = action.payload
+    }
   },
 });
 
 export default chatSlice;
 export const {setPinnedChatsArray,
   deleteFromPinnedChats,
+  setChatSelection,
   setPinnedChats,
 } = chatSlice.actions;
