@@ -14,13 +14,12 @@ import DeleteChatMenu from '../Dialogs/deleteChatMenu'
 const appLayout = () =>(WrappedComponent)=> {
   return (props)=>{
     const {socket} = getSocket()
-    console.log(socket)
+    //console.log(socket)
     const dispatch = useDispatch()
     const params = useParams();
     const chatId = params.chatId;
     const chatListRef = useRef(null)
     const toggleButtonRef = useRef(null)
-
     const deleteOptionAnchor = useRef(null)
     // window.addEventListener("click",(e)=>{
     //     if(e.target !== chatListRef.current && e.target !==toggleButtonRef ){
@@ -30,11 +29,12 @@ const appLayout = () =>(WrappedComponent)=> {
 
 
     const [onlineUsers, setOnlineUsers] = useState(["hello"])
-    //const onlineUsers = new Set()
+ 
     const {data,isLoading,isError,error,refetch} = useMyChatsQuery()
     const {user,Loader} = useSelector((state)=>state.auth) 
-    const {isChatList} = useSelector((state)=>state.misc) 
-    
+    const {isChatList,isDeleteMenu} = useSelector((state)=>state.misc) 
+    const {pinnedChats} = useSelector((state)=>state.chat) 
+    console.log(pinnedChats)
     const searchUser=()=>{
         e.preventDefault();
     }
@@ -46,7 +46,9 @@ const appLayout = () =>(WrappedComponent)=> {
 
     const refetchChatHandler = ({exists})=>{
         if(exists) return
+       console.log("refteched on delete")
         refetch()
+
   }
     const newMessageAlertHandler = ({chatId})=>{
          console.log("alert")
@@ -75,17 +77,19 @@ const appLayout = () =>(WrappedComponent)=> {
       }
     useSocketEvents(socket,eventHandlers)
 
-    const handleDeleteChat = (e ,_id , groupChat)=>{
+    const handleDeleteChat = (e ,_id , chatRef,groupChat)=>{
       e.preventDefault()
-      console.log(_id)
-       deleteOptionAnchor.current = e.currentTarget;
+      deleteOptionAnchor.current = e.currentTarget;
+      deleteOptionAnchor.pageX = e.pageX;
+      deleteOptionAnchor.pageY = e.pageY;
+
       dispatch(setChatIdContextMenu(_id))
        dispatch(setIsDeleteMenu(true))
     //   dispatch(setSelectedDeleteChat({chatId,_id,groupChat}))
     };
 
     return(
-   <div className=' h-100hv w-100vw'>
+   <div className=' h-100hv w-100vw '>
     {/* header */}
         <div className='header flex justify-center items-center w-full bg-[#ffff] shadow-sm h-[4.3rem] md:h-[6.3rem]'>
             <div className='bg-slate-100  h-[60%] w-[95%] flex justify-between'>
@@ -95,7 +99,7 @@ const appLayout = () =>(WrappedComponent)=> {
         </div>
         
         
-         <DeleteChatMenu/>
+         {isDeleteMenu && <DeleteChatMenu socket={socket} anchor={deleteOptionAnchor}/>}
       
         {/* togglechatlist */}
         <div className='md:hidden flex pl-4 h-[2rem] w-full'>

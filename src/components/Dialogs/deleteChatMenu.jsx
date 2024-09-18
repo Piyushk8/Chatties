@@ -1,43 +1,92 @@
 
 
-import React, { useReducer, useState } from 'react'
-import { useSelector } from 'react-redux';
+import React, { useEffect, useReducer, useRef, useState } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
 
-const DeleteChatMenu = () => {
+import { setIsDeleteMenu } from '../../redux/reducers/misc';
+import { useDeleteChatMutation } from '../../redux/reducers/api';
+import { useNavigate } from 'react-router-dom';
+import { deleteFromPinnedChats, setPinnedChats } from '../../redux/reducers/chat';
+
+const DeleteChatMenu = ({anchor , socket}) => {
+
+  const dispatch = useDispatch()
+  const dialogRef = useRef(null)
+  const nav = useNavigate()
+
+
   const [menuPosition, setMenuPosition] = useState(null);
   const {isDeleteMenu,chatIdContextMenu} = useSelector((state)=>state.misc)
-  console.log(isDeleteMenu,chatIdContextMenu)
+  const {pinnedChats} = useSelector((state)=>state.chat)
+  const {user} = useSelector((state)=>state.auth)
+  console.log(isDeleteMenu,chatIdContextMenu,anchor)
+  
   const chatId = chatIdContextMenu
-  // Handle right-click to open the context menu
-  // const handleRightClick = (event) => {
-  //   event.preventDefault(); // Prevent default context menu
 
-  //   const rect = chatRef.current.getBoundingClientRect(); // Get position of the chat div
+  //hooks
+  const [deleteChat , {isError,isLoading,isSuccess}] = useDeleteChatMutation()
 
-  //   setMenuPosition({
-  //     top: rect.bottom, // Position it at the bottom of the chat div
-  //     left: rect.left,  // Align it with the left side of the chat div
-  //   });
-  // };
+  useEffect(()=>{
+    dialogRef.current = anchor.current
+  },[isDeleteMenu,chatIdContextMenu])
 
-  // Close the menu
-  // const handleClose = () => {
-  //   setMenuPosition(null);
-  // };
+  const handleDeleteChat = async()=>{
+    const res = await deleteChat({id:chatId})
+    nav("/")
+    console.log(res)
+  }
+  const pinChatHandler =()=>{
+    dispatch(setIsDeleteMenu(false));
+    console.log("pinchat",user)
+    socket.emit("pinChat",{pinned:true,userId:user.id,chatId:chatIdContextMenu})     
+    dispatch(setPinnedChats(chatIdContextMenu))
+    console.log(pinnedChats)
+}
+const unPinChatHandler =()=>{
+    dispatch(setIsDeleteMenu(false))
+    socket.emit("pinChat",{pinned:false,userId:user.id,chatId:chatIdContextMenu})     
+    dispatch(deleteFromPinnedChats(chatIdContextMenu))
+    console.log(pinnedChats)
+}
 
-  // Delete chat logic
-  // const handleDeleteChat = () => {
-  //   deleteChat(chat.id);
-  //   handleClose();
-  // };
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (dialogRef.current && !dialogRef.current.contains(e.target)) {
+        // Dispatch action to close the menu
+        dispatch(setIsDeleteMenu(false));
+      }
+    };
+    // Attach the event listener
+    window.addEventListener('click', handleClickOutside);
+
+    // Clean up the event listener when the component is unmounted or dialog is closed
+    return () => {
+      window.removeEventListener('click', handleClickOutside);
+    };
+  }, [dispatch])
   return (
     <>
-    {
-      !isDeleteMenu ? <>{chatIdContextMenu}</> : <div >
-      menu
-     </div>
- 
-    }
+    <div
+         ref={dialogRef}
+          
+          style={{
+            position: 'fixed',
+            left: `${anchor.pageX}px`,
+            top: `${anchor.pageY}px`,
+            //transform: 'translate(-50%, -50%)', // Optional for centering
+          }}
+          className="bg-white shadow-lg rounded p-4 z-50"
+        >
+          <ul>
+            {pinnedChats?.includes(chatIdContextMenu) ?
+            <li onClick={unPinChatHandler}  className="hover:bg-gray-200 p-2 cursor-pointer">unfavourite</li> :
+            <li onClick={pinChatHandler}  className="hover:bg-gray-200 p-2 cursor-pointer">favourite</li>
+            }
+            <li className="hover:bg-gray-200 p-2 cursor-pointer">Mute Chat </li>
+            <li onClick={handleDeleteChat} className="hover:bg-gray-200 p-2 cursor-pointer">Delete Chat </li>
+          </ul>
+        </div>
     </>
   
   )

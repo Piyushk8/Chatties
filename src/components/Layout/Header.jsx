@@ -7,7 +7,7 @@ import toast from 'react-hot-toast'
 import { userNotExists } from '../../redux/reducers/auth'
 const Header = ({user}) => {
 const [isProfileOpen, setisProfileOpen] = useState(false)
-const {name ,avatar} = user;
+
 const ProfileRef = useRef(null)
 const imageRef = useRef(null)
 const dispatch = useDispatch()
@@ -51,12 +51,12 @@ const dispatch = useDispatch()
           <div class="avatar">
           <div class=" w-10 rounded-full ">
             <img ref={imageRef} onClick={handleClick} 
-              className="cursor-pointer rounded-full h-10 w-10" src={avatar?.url || userAvatar} />
+              className="cursor-pointer rounded-full h-10 w-10" src={user?.avatar?.url || userAvatar} />
           </div>
           </div>
 
           <div className='ml-4 self-start flex-col justify-center'>
-              <div className='text-base font-semibold'>{name}</div>
+              <div className='text-base font-semibold'>{user?.name}</div>
               <div className='text-sm font-medium  text-[#B0B0B0]'>{userTyping ? "Typing...":""}</div>
           </div>
         </div>

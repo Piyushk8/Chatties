@@ -91,4 +91,5 @@ export const  {useCreateChatMutation
     ,useChatDetailsQuery,
     useGetMessagesQuery,
     useMyChatsQuery,
+    useDeleteChatMutation,
 useSendAttachmentsMutation} = api;

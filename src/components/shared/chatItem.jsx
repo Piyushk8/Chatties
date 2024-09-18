@@ -22,6 +22,8 @@ const ChatItem = ({
   handleDeleteChat,
 }) => {
   const dispatch = useDispatch()
+  const {pinnedChats} = useSelector((state)=>state.chat)
+
   const chatRef = useRef(null)
   const lastSeenTime = timeAgo(lastSeen)
   if(!avatar) avatar = userAvatar
@@ -56,10 +58,18 @@ const ChatItem = ({
         <div className=" text-sm h-11  text-[#454545] text-ellipsis overflow-y-hidden overflow-x-hidden  ">
            {"~"} {lastMessage}
           </div>
-
-        </div>
         
-       
+        </div>
+       {
+        pinnedChats?.includes(_id) &&  <div className="">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="size-5">
+        <path stroke-linecap="sharp" stroke-linejoin="sharp" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+        </svg>
+
+      </div>
+       }
+        
+       {/* <DeleteChatMenu/> */}
         
       </motion.div>
    
