@@ -1,7 +1,8 @@
 import axios from "axios";
+import "dotenv"
 
-export const server = "http://localhost:3000"
 
+export const server = import.meta.env.VITE_SERVER
 
 const headers = {
     "Content-Type": `multipart/form-data;`,

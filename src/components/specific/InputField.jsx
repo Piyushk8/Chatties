@@ -113,7 +113,7 @@ const SearchInput = () => {
             {options.length > 0 && (
 
             <div 
-                className="w-[16rem] hover:text-white bg-opacity-20 backdrop-blur-sm p-2 rounded-xl shadow-sm   absolute scrollbar-none top-full  left-0 right-0 max-h-[60rem] overflow-y-auto bg-white border border-t-0 border-gray-300 rounded-b z-10"
+                className="w-full hover:text-white p-2 rounded-xl shadow-sm   absolute scrollbar-none top-full  left-0 right-0 max-h-[60rem] overflow-y-auto bg-white border border-t-0 border-gray-300 rounded-b z-10"
                 >
             <ul 
                 ref={OptionRef}

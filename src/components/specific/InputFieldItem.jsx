@@ -34,9 +34,9 @@ const InputFieldItem = ({ option, index, selectedItem }) => {
             <li
                 key={index}
                 onClick={handleCreateChat}
-                className={`${selectedItem === index ? 'bg-gray-200' : ''} p-2 hover:bg-gray-200 cursor-pointer`}
+                className={`${selectedItem === index ? 'bg-gray-200' : ''} p-2 pb-0 hover:bg-gray-200 cursor-pointer`}
             >
-                <div className="flex justify-start my-3">
+                <div className="flex border-b-2 pb-4 justify-start my-3">
                     <div className='mr-6'>
                         <Avatar avatar={option.avatar} />
                     </div>
