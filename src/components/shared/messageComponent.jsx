@@ -12,10 +12,11 @@ const MessageComponent = ({user,message }) => {
   return (
     <div
      style={{
-        marginBottom:"2px",    
+        marginBottom:"2px", 
+        maxWidth:'50%',
         alignSelf:sameSender ? "flex-end":"flex-start",
     }} >
-        <div className={`p-3 rounded-lg  my-0.5 md:mt-2  flex flex-col min-w-4 min-h-11 h-fit ${sameSender?`text-white bg-[#EF6144]`:`bg-[#F6F6F6]`}`}>
+        <div className={`p-3 rounded-lg     my-0.5 md:mt-2  flex flex-col  min-h-11 h-fit ${sameSender?`text-white bg-[#EF6144]`:`bg-[#F6F6F6]`}`}>
         {content ? <div>{content}</div> : ""}
         <div className='py-1 ' >
         {
@@ -34,7 +35,7 @@ const MessageComponent = ({user,message }) => {
         </div>
         </div>
         <div className='self-end w-full h-fit text-[8px] p-0 bg-white text-[#B0B0B0] ${sameSender?`text-white bg-orange-500`:`bg-slate-200`}'>
-            read {timeAgo}
+           {sameSender ? `read ${timeAgo}` : `${timeAgo}`}
         </div>
     </div>
   )

@@ -13,18 +13,20 @@ import Header from '../Layout/Header'
 import FileMenu from '../specific/FileMenu'
 const Chat = ({chatId,user}) => {
   const {socket} = getSocket()
+  const dispatch = useDispatch();
+
   const [page, setpage] = useState(1)
   const [message, setMessage] = useState("")
   const [messages, setMessages] = useState([])
   const [MeTyping, setMeTyping] = useState(false)
-  const typingtimeOut = useRef(null)
-  const dispatch = useDispatch();
   
+  const typingtimeOut = useRef(null)
   const containerRef = useRef(null)
   const fileMenuRef = useRef(null)
   const bottomRef = useRef(null)
+  
   const {userTyping ,isFileMenu} = useSelector((state)=>state.misc)
-
+  
   const {data,isLoading
     ,isError,error
   } = useGetMessagesQuery({
@@ -45,9 +47,6 @@ const Chat = ({chatId,user}) => {
     setpage,
     data?.messages
   )
-
-
-
 
 
 //!all handlers
@@ -74,7 +73,9 @@ const SubmitHandler = (e)=>{
         }, 1500);
         
       }
-      const openFileMenu =()=>{
+      const openFileMenu =(e)=>{
+        fileMenuRef.pageX = e.pageX,
+        fileMenuRef.pageY = e.pageY
         dispatch(setIsFileMenu())
       }
     
@@ -183,12 +184,12 @@ const SubmitHandler = (e)=>{
                 value={message}
                 
                 />
-                  <div className='mr-1' ref={fileMenuRef} onClick={openFileMenu}>
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#EF6144" className="size-6">
-                      <path strokeLinecap="round" strokeLinejoin="round"  
-                      d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
-                    </svg>
-                    </div>
+                <div className='mr-1' ref={fileMenuRef} onClick={openFileMenu}>
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#EF6144" className="size-6">
+                    <path strokeLinecap="round" strokeLinejoin="round"  
+                    d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13" />
+                  </svg>
+                  </div>
               <div onClick={SubmitHandler} className='bg-[#FEE7E2] p-1' >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="#DC4A2D" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />

@@ -76,7 +76,7 @@ const dispatch = useDispatch()
                   className="cursor-pointer rounded-full h-20 w-20" src={ userAvatar } />
               </div>
               <div className='font-bold text-2xl text-gray-600'>{name}</div>
-              <div> joined </div>
+              <div> profile </div>
               </div>
            }
 

@@ -56,8 +56,8 @@ const ChatItem = ({
               <span className="self-start text-xs font-bold  text-[#212121] overflow-hidden whitespace-nowrap text-ellipsis">{name} </span>
               <div className=" text-[9px]  text-[#B0B0B0] overflow-hidden whitespace-nowrap text-ellipsis">{lastSeenTime}</div>
             </div>
-            <div className=" text-sm h-11  text-[#454545] text-ellipsis overflow-y-hidden overflow-x-hidden  ">
-              {"~"} {lastMessage}
+            <div className=" text-sm h-11  text-gray-400 text-ellipsis overflow-y-hidden overflow-x-hidden  ">
+               {lastMessage}
               </div>
             </div>
 
