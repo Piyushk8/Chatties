@@ -1,19 +1,16 @@
-import React, { useEffect, useRef, useState } from 'react'
+import React, { memo, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsFileMenu, setUploadingLoader } from "../../redux/reducers/misc"
 //import { AudioFile as AudioFileIcon, Image as ImageIcon, UploadFile as UploadFileIcon,  VideoFile as VideoFileIcon} from '@mui/icons-material';
 import toast from 'react-hot-toast';
 import { useSendAttachmentsMutation } from '../../redux/reducers/api';
 
-const FileMenu = ({ fileMenuRef, chatId }) => {
+const FileMenu = memo(({ fileMenuRef, chatId }) => {
     const { isFileMenu } = useSelector((state) => state.misc);
    
     const dispatch = useDispatch();
     const top = fileMenuRef.pageY-180
     const left = fileMenuRef.pageX-180
-    console.log(fileMenuRef,fileMenuRef.pageX,fileMenuRef.pageY)
-
-
 
   const imageRef = useRef(null);
   const audioRef = useRef(null);
@@ -24,7 +21,13 @@ const FileMenu = ({ fileMenuRef, chatId }) => {
 
   const closeFileMenu = () => dispatch(setIsFileMenu());
 
-  const selectImage = () => imageRef.current?.click();
+  const selectImage = () => {
+    if (imageRef.current) {
+      imageRef.current.click(); // Ensure the ref is correct and clicking is working
+    } else {
+      console.error('imageRef is not correctly bound');
+    }
+  };
   const selectAudio = () => audioRef.current?.click();
   const selectVideo = () => videoRef.current?.click();
   const selectFile = () => fileRef.current?.click();
@@ -62,15 +65,25 @@ const FileMenu = ({ fileMenuRef, chatId }) => {
   };
 
 
-  useEffect(()=>{
-    if(isFileMenu){
-        window.addEventListener("click",(e)=>{
-            if(e.target!==fileMenuRef.current ){
-                closeFileMenu()
-            }
-        })
-    }
-  },[isFileMenu])
+//   useEffect(() => {
+//     const handleClickOutside = (e) => {
+//       if (
+//         fileMenuRef.current &&
+//         !fileMenuRef.current.contains(e.target) &&
+//         isFileMenu
+//       ) {
+//         closeFileMenu();
+//       }
+//     };
+
+//     if (isFileMenu) {
+//       document.addEventListener('click', handleClickOutside);
+//     }
+
+//     return () => {
+//       document.removeEventListener('click', handleClickOutside);
+//     };
+//   }, [isFileMenu, fileMenuRef]);
 
   return (
 
@@ -153,6 +166,6 @@ const FileMenu = ({ fileMenuRef, chatId }) => {
     </div>
 </div>
   );
-};
+});
 
 export default FileMenu;

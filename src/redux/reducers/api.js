@@ -47,7 +47,7 @@ const api = createApi({
                 credentials:"include",
                 body:data,
             }),
-            invalidatesTags:["user"]
+            invalidatesTags:["message"]
         }),
        createChat:builder.mutation({
             query:({userId})=>({

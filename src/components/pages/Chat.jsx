@@ -27,11 +27,12 @@ const Chat = ({chatId,user}) => {
   
   const {userTyping ,isFileMenu} = useSelector((state)=>state.misc)
   
-  const {data,isLoading
+  const {data,isLoading,isSuccess:messageSuccess
     ,isError,error
   } = useGetMessagesQuery({
     page,id:chatId
   }) 
+  console.log(data)
 
   const {data:chatDetails,
     isError:chatDetailsIsError,
@@ -73,11 +74,11 @@ const SubmitHandler = (e)=>{
         }, 1500);
         
       }
-      const openFileMenu =(e)=>{
+      const openFileMenu =useCallback((e)=>{
         fileMenuRef.pageX = e.pageX,
         fileMenuRef.pageY = e.pageY
         dispatch(setIsFileMenu())
-      }
+      },[dispatch])
     
       
       //!Event listner handlers
@@ -100,7 +101,7 @@ const SubmitHandler = (e)=>{
         if (data.chatId !== chatId) return;
         console.log("newmesageListener")
         // Safely update messages state
-        setMessages((prevMessages) => [...prevMessages, data.message]);
+        setMessages((prevMessages) => [...prevMessages, data?.message||data]);
       }, [chatId]);
       
       const AlertListener = useCallback((content) => {
@@ -142,7 +143,7 @@ const SubmitHandler = (e)=>{
       useEffect(()=>{
         if(bottomRef.current) bottomRef.current.scrollIntoView({behavior:"smooth"})
         },[messages])
-      // console.log(messages)
+    
       
       return (<>
     {
@@ -156,13 +157,13 @@ const SubmitHandler = (e)=>{
 
         <div ref={containerRef} className='overflow-y-scroll flex flex-col scrollbar-thin scrollbar-thumb-orange-400 pl-1 pr-2 md:pr-8'>
         {
-          oldMessages?.map((message,index)=>{
+          messageSuccess && oldMessages?.map((message,index)=>{
             return <MessageComponent key={index} user={user} message={message}/>
           })
           
         }
         {
-          messages?.map((message,index)=>{
+          messageSuccess && messages?.map((message,index)=>{
             return <MessageComponent key={index} user={user} message={message} ></MessageComponent>
           })
         }
