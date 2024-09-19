@@ -6,7 +6,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { setIsDeleteMenu } from '../../redux/reducers/misc';
 import { useDeleteChatMutation } from '../../redux/reducers/api';
 import { useNavigate } from 'react-router-dom';
-import { deleteFromPinnedChats, setPinnedChats } from '../../redux/reducers/chat';
+import { deleteFromMuteChats, deleteFromPinnedChats, setMuteChats, setPinnedChats } from '../../redux/reducers/chat';
 
 const DeleteChatMenu = ({anchor , socket}) => {
 
@@ -17,7 +17,7 @@ const DeleteChatMenu = ({anchor , socket}) => {
 
   const [menuPosition, setMenuPosition] = useState(null);
   const {isDeleteMenu,chatIdContextMenu} = useSelector((state)=>state.misc)
-  const {pinnedChats} = useSelector((state)=>state.chat)
+  const {pinnedChats,muteChats} = useSelector((state)=>state.chat)
   const {user} = useSelector((state)=>state.auth)
   console.log(isDeleteMenu,chatIdContextMenu,anchor)
   
@@ -49,6 +49,16 @@ const unPinChatHandler =()=>{
     console.log(pinnedChats)
 }
 
+  const muteChatHandler = ()=>{
+    dispatch(setIsDeleteMenu(false));
+    //socketLogic
+    dispatch(setMuteChats(chatIdContextMenu))
+  }
+  const unMuteChatHandler = ()=>{
+    dispatch(setIsDeleteMenu(false));
+    //socketLogic
+    dispatch(deleteFromMuteChats(chatIdContextMenu))
+  }
 
   useEffect(() => {
     const handleClickOutside = (e) => {
@@ -69,7 +79,6 @@ const unPinChatHandler =()=>{
     <>
     <div
          ref={dialogRef}
-          
           style={{
             position: 'fixed',
             left: `${anchor.pageX}px`,
@@ -83,7 +92,13 @@ const unPinChatHandler =()=>{
             <li onClick={unPinChatHandler}  className="hover:bg-gray-200 p-2 cursor-pointer">unfavourite</li> :
             <li onClick={pinChatHandler}  className="hover:bg-gray-200 p-2 cursor-pointer">favourite</li>
             }
-            <li className="hover:bg-gray-200 p-2 cursor-pointer">Mute Chat </li>
+            {
+              muteChats?.includes(chatIdContextMenu) ?
+              <li onClick={unMuteChatHandler}  className="hover:bg-gray-200 p-2 cursor-pointer">unMute Chat </li>
+              :
+              <li onClick={muteChatHandler}  className="hover:bg-gray-200 p-2 cursor-pointer">Mute Chat </li>
+            
+            }
             <li onClick={handleDeleteChat} className="hover:bg-gray-200 p-2 cursor-pointer">Delete Chat </li>
           </ul>
         </div>

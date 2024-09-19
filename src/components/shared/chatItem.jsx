@@ -22,7 +22,7 @@ const ChatItem = ({
   handleDeleteChat,
 }) => {
   const dispatch = useDispatch()
-  const {pinnedChats} = useSelector((state)=>state.chat)
+  const {pinnedChats,muteChats} = useSelector((state)=>state.chat)
 
   const chatRef = useRef(null)
   const lastSeenTime = timeAgo(lastSeen)
@@ -62,15 +62,25 @@ const ChatItem = ({
             </div>
 
        </div>
-        {
-          pinnedChats?.includes(_id) &&  <div className="">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1" stroke="currentColor" class="size-5">
-          <path stroke-linecap="sharp" stroke-linejoin="sharp" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
-          </svg>
+       <div>
 
-        </div>
+        {
+          pinnedChats?.includes(_id) &&  
+          <div className="">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="lightgray" viewBox="0 0 24 24" stroke-width="1" stroke="none" class="size-5">
+              <path stroke-linecap="sharp" stroke-linejoin="sharp" d="M17.593 3.322c1.1.128 1.907 1.077 1.907 2.185V21L12 17.25 4.5 21V5.507c0-1.108.806-2.057 1.907-2.185a48.507 48.507 0 0 1 11.186 0Z" />
+            </svg>
+          </div>
         }
-     
+        {
+          muteChats?.includes(_id) && 
+          <div>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="lightgray" viewBox="0 0 24 24" stroke-width="1" stroke="lightgray" class="size-5">
+              <path stroke-linecap="sharp" stroke-linejoin="sharp" d="M9.143 17.082a24.248 24.248 0 0 0 3.844.148m-3.844-.148a23.856 23.856 0 0 1-5.455-1.31 8.964 8.964 0 0 0 2.3-5.542m3.155 6.852a3 3 0 0 0 5.667 1.97m1.965-2.277L21 21m-4.225-4.225a23.81 23.81 0 0 0 3.536-1.003A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6.53 6.53m10.245 10.245L6.53 6.53M3 3l3.53 3.53" />
+            </svg>
+          </div>
+        }
+        </div>
        {/* <DeleteChatMenu/> */}
         
       </motion.div>

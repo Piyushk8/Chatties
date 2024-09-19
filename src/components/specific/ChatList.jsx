@@ -13,6 +13,7 @@ const ChatList = ({
         }],
         handleDeleteChat
 }) => {
+  console.log("chatList",chatData)
   //hooks
   const  dispatch = useDispatch()
   const {chatSelection,pinnedChats }= useSelector((state)=>state.chat)
@@ -29,12 +30,10 @@ const ChatList = ({
 
 
       const allHandler = ()=>{
-        console.log('all handler')
         const allChats = chatData.transformedChat;
-
         const pinnedChatsArray = allChats.filter((i) => pinnedChats.includes(i.chatId));
         const nonPinnedChatsArray = allChats.filter((i) => !pinnedChats.includes(i.chatId));
-  
+
         setChats([...pinnedChatsArray, ...nonPinnedChatsArray]); // This will only setChats when chatData changes
       
       }
@@ -42,12 +41,10 @@ const ChatList = ({
         dispatch(chatSelection("all"))
       }
       const favHandler = ()=>{
-        console.log("favorite ")
         dispatch(setChatSelection("Favorites"))
         const allChats = chatData.transformedChat;
         const favChats = allChats?.filter((i)=>pinnedChats?.includes(i.chatId))
         setChats(favChats)
-        
       }
 
 
@@ -70,23 +67,32 @@ const ChatList = ({
             </button>
           ))}
         </div>
-    <div className='w-full h-[calc(100%-2rem) flex flex-col overflow-y-scroll scrollbar-hide justify-start gap-5'>
+    <div className='w-full h-[calc(100%-2rem) flex  flex-col overflow-y-scroll scrollbar-hide justify-start gap-5'>
          {
-           chats.map((chat,index)=> {
-             return <ChatItem
-             handleDeleteChat={handleDeleteChat}
-             selected={chatId===chat.chatId}
-             lastMessage={chat?.chat?.lastMessage||""}
-             lastSeen={chat?.chat?.lastSent}
-             isOnline={onlineUsers?.includes(chat.user.id)} 
-             index={index}
-             key={index}
-             avatar={chat?.user?.avatar} 
-             name={chat?.user.name}
-             _id={chat?.chatId}
-             > </ChatItem>
+          
+          chats.length==0 ? 
+            <div className='self-center justify-center pt-10 '>
+               <div className='font-bold text-gray-400 text-lg h-full justify-center'>
+                 {
+                  chatSelection === "all" ? "No chats Search Users" :"No Chats Found"
+                 }
+               </div>
+            </div>:
+            chats.map((chat,index)=> {
+              return <ChatItem
+              handleDeleteChat={handleDeleteChat}
+              selected={chatId===chat.chatId}
+              lastMessage={chat?.chat?.lastMessage||""}
+              lastSeen={chat?.chat?.lastSent}
+              isOnline={onlineUsers?.includes(chat.user.id)} 
+              index={index}
+              key={index}
+              avatar={chat?.user?.avatar} 
+              name={chat?.user.name}
+              _id={chat?.chatId}
+              > </ChatItem>
             })
-}
+        }
 
     </div>
           </>

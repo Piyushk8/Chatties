@@ -1,17 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { useNavigate, useParams } from 'react-router-dom'
-import ChatList from '../specific/ChatList'
 import Header from './Header'
 import mainLogo from "../../assets/mainLogo.png"
 import { useMyChatsQuery } from '../../redux/reducers/api'
-import SearchInput from '../specific/InputField'
 import {getSocket} from "../../socket"
 import {I_AM_OFFLINE, I_AM_ONLINE, NEW_MESSAGE, NEW_MESSAGE_ALERT, ONLINE_USER, REFETECH_CHATS } from "../../constant/event"
 import { useSocketEvents } from '../../hooks/hook'
 import { closeChatList, setChatIdContextMenu, setIsChatList, setIsDeleteMenu } from '../../redux/reducers/misc'
+import SearchInput from '../specific/InputField'
 import ChatLoaders from './Loaders'
-import DeleteChatMenu from '../Dialogs/deleteChatMenu'
+import { setChatSelection } from '../../redux/reducers/chat'
+const ChatList = lazy(()=>import('../specific/ChatList'))
+const DeleteChatMenu = lazy(()=>import('../Dialogs/deleteChatMenu'))
 const appLayout = () =>(WrappedComponent)=> {
   return (props)=>{
     const {socket} = getSocket()
@@ -80,18 +81,23 @@ const appLayout = () =>(WrappedComponent)=> {
       deleteOptionAnchor.current = e.currentTarget;
       deleteOptionAnchor.pageX = e.pageX;
       deleteOptionAnchor.pageY = e.pageY;
-
       dispatch(setChatIdContextMenu(_id))
-       dispatch(setIsDeleteMenu(true))
+      dispatch(setIsDeleteMenu(true))
     //   dispatch(setSelectedDeleteChat({chatId,_id,groupChat}))
     };
 
     
     useEffect(() => {
       const handleClickOutside = (e) => {
-        if (e.target !== toggleButtonRef.current && isChatList) {
+        console.log(chatListRef.current , "chatlist ref")
+        if (
+          chatListRef.current &&
+          !chatListRef.current.contains(e.target) &&
+          toggleButtonRef.current &&
+          !toggleButtonRef.current.contains(e.target) ) {
           dispatch(closeChatList());
-          console.log("e", e.target);
+          dispatch(setChatSelection("all"))
+         
         }
       };
     
@@ -120,7 +126,8 @@ const appLayout = () =>(WrappedComponent)=> {
         <div className='md:hidden flex pl-4 h-[2rem] w-full'>
             <button onClick={()=>{
               dispatch(setIsChatList())
-              console.log("clicked",isChatList)}}>
+              dispatch(setChatSelection("all"))
+              }}>
                 <svg ref={toggleButtonRef} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
                 </svg>
@@ -133,10 +140,14 @@ const appLayout = () =>(WrappedComponent)=> {
                         <SearchInput/>
             </div>
       
-            <div className='rounded-lg bg-slate-50 overflow-scroll scrollbar-none'>
-           <ChatList handleDeleteChat={handleDeleteChat} onlineUsers={onlineUsers} chatId={chatId}  chatData={data} />
-            </div>
-            
+            {isLoading ? (
+              <ChatLoaders />
+              ) : (
+                <div className="h-full flex-shrink overflow-y-auto">
+                  <ChatList handleDeleteChat={handleDeleteChat} onlineUsers={onlineUsers} chatId={chatId} chatData={data} />
+                </div>
+              )}
+              
             </div>
         }
 

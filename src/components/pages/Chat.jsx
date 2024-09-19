@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react'
+import React, { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import appLayout from '../Layout/appLayout'
 import { useParams } from 'react-router-dom'
 import { useChatDetailsQuery, useGetMessagesQuery } from '../../redux/reducers/api'
@@ -10,7 +10,7 @@ import {getSocket} from "../../socket"
 import { useDispatch, useSelector } from 'react-redux'
 import { setIsFileMenu, setUserTyping } from '../../redux/reducers/misc'
 import Header from '../Layout/Header'
-import FileMenu from '../specific/FileMenu'
+const FileMenu = lazy(()=>import('../specific/FileMenu'))
 const Chat = ({chatId,user}) => {
   const {socket} = getSocket()
   const dispatch = useDispatch();
