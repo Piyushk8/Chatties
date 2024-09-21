@@ -1,10 +1,10 @@
 import React, { lazy, useCallback, useEffect, useRef, useState } from 'react'
 import appLayout from '../Layout/appLayout'
-import { useParams } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useChatDetailsQuery, useGetMessagesQuery } from '../../redux/reducers/api'
 import MessageComponent from '../shared/messageComponent'
 import { useInfiniteScrollTop } from '../../hooks/hook'
-import {ALERT,NEW_MESSAGE,NEW_MESSAGE_ALERT,IS_TYPING,STOP_TYPING} from "../../constant/event"
+import {ALERT,NEW_MESSAGE,NEW_MESSAGE_ALERT,IS_TYPING,STOP_TYPING, REFETECH_CHATS} from "../../constant/event"
 import { useSocketEvents } from "../../hooks/hook"
 import {getSocket} from "../../socket"
 import { useDispatch, useSelector } from 'react-redux'
@@ -14,6 +14,7 @@ const FileMenu = lazy(()=>import('../specific/FileMenu'))
 const Chat = ({chatId,user}) => {
   const {socket} = getSocket()
   const dispatch = useDispatch();
+  const nav = useNavigate("/")
 
   const [page, setpage] = useState(1)
   const [message, setMessage] = useState("")
@@ -27,19 +28,32 @@ const Chat = ({chatId,user}) => {
   
   const {userTyping ,isFileMenu} = useSelector((state)=>state.misc)
   
-  const {data,isLoading,isSuccess:messageSuccess
-    ,isError,error
-  } = useGetMessagesQuery({
-    page,id:chatId
-  }) 
-  console.log(data)
-
-  const {data:chatDetails,
-    isError:chatDetailsIsError,
-    isLoading:chatDetailsLoading
-  } = useChatDetailsQuery({id:chatId})
-  const members =chatDetails?.members
+    const {data:chatDetails,
+      refetch:refetchChatDetails,
+      isError:chatDetailsIsError,
+      isLoading:chatDetailsLoading
+    } = useChatDetailsQuery({id:chatId})
+    const members =chatDetails?.members
+    console.log(chatDetails)
   
+    useEffect(()=>{
+      if(!chatDetails && !isLoading){
+        console.log(chatDetails,isLoading)
+        nav("/")
+      }
+      if(chatDetailsIsError && !isLoading){
+        console.log(chatDetails)
+        nav("/")
+      }
+    },[chatDetails])
+
+    const {data,isLoading,isSuccess:messageSuccess
+      ,isError,error
+    } = useGetMessagesQuery({
+      page,id:chatId
+    }) 
+ 
+
   const {
     data:oldMessages,setData:setOldMessages
   } = useInfiniteScrollTop(
@@ -48,6 +62,10 @@ const Chat = ({chatId,user}) => {
     setpage,
     data?.messages
   )
+
+  const errorhandler =()=>{
+    //error handling page logic
+  }
 
 
 //!all handlers
@@ -97,9 +115,7 @@ const SubmitHandler = (e)=>{
       
       
       const newMessagesListener = useCallback((data) => {
-        console.log(data,"data")
         if (data.chatId !== chatId) return;
-        console.log("newmesageListener")
         // Safely update messages state
         setMessages((prevMessages) => [...prevMessages, data?.message||data]);
       }, [chatId]);
@@ -117,14 +133,22 @@ const SubmitHandler = (e)=>{
         }
       }, [chatId]);
       
+      const refetchChatDetailsListener = useCallback(()=>{
+        console.log("heree")
+        refetchChatDetails()
+        if(!chatDetails) nav("/")
+        console.log(chatDetails)
+      },[chatId,refetchChatDetails])
       
       const eventHandlers = {
         [ALERT] : AlertListener,
+        [REFETECH_CHATS]:refetchChatDetailsListener,
         [NEW_MESSAGE]:newMessagesListener,
         [IS_TYPING]:isTypingListener,
         [STOP_TYPING]:stopTypingListener
       }
       useSocketEvents(socket,eventHandlers)
+      
       
 
       useEffect(()=>{

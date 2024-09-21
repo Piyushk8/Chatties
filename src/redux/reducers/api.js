@@ -30,7 +30,8 @@ const api = createApi({
                 return{url,
                 credentials:"include"}
             },
-            providesTags:["Chat"],
+            keepUnusedDataFor: 0,
+            providesTags:["Chats"],
         }),
         getMessages:builder.query({
             query:({id,page})=>({
@@ -56,7 +57,7 @@ const api = createApi({
                 credentials:"include",
                 body:{userId}
             }),
-            invalidatesTags:["chat"],
+            invalidatesTags:["Chats"],
         }),
         deleteChat:builder.mutation({
             query:({id})=>({
@@ -64,7 +65,7 @@ const api = createApi({
                 method:"DELETE",
                 credentials:"include",
             }),
-            invalidatesTags:["chat"]
+            invalidatesTags:["Chats"]
         }),
         leaveGroup:builder.mutation({
             query:({id})=>({
@@ -72,7 +73,7 @@ const api = createApi({
                 method:"DELETE",
                 credentials:"include",
             }),
-            invalidatesTags:["chat"]
+            invalidatesTags:["Chats"]
         }),
         // renameUser:builder.mutation({
         //     query:({newName})=>({

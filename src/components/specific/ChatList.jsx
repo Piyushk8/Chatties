@@ -13,7 +13,7 @@ const ChatList = ({
         }],
         handleDeleteChat
 }) => {
-  console.log("chatList",chatData)
+ 
   //hooks
   const  dispatch = useDispatch()
   const {chatSelection,pinnedChats }= useSelector((state)=>state.chat)
@@ -26,7 +26,7 @@ const ChatList = ({
     if (chatSelection === 'all' && chatData?.transformedChat) {
     allHandler()
     }
-  }, [chatSelection,pinnedChats]);
+  }, [chatSelection,pinnedChats,chatData]);
 
 
       const allHandler = ()=>{

@@ -32,21 +32,18 @@ const DeleteChatMenu = ({anchor , socket}) => {
 
   const handleDeleteChat = async()=>{
     const res = await deleteChat({id:chatId})
-    nav("/")
+   // nav("/")
     console.log(res)
   }
   const pinChatHandler =()=>{
     dispatch(setIsDeleteMenu(false));
-    console.log("pinchat",user)
     socket.emit("pinChat",{pinned:true,userId:user.id,chatId:chatIdContextMenu})     
     dispatch(setPinnedChats(chatIdContextMenu))
-    console.log(pinnedChats)
 }
 const unPinChatHandler =()=>{
     dispatch(setIsDeleteMenu(false))
     socket.emit("pinChat",{pinned:false,userId:user.id,chatId:chatIdContextMenu})     
     dispatch(deleteFromPinnedChats(chatIdContextMenu))
-    console.log(pinnedChats)
 }
 
   const muteChatHandler = ()=>{
@@ -85,7 +82,7 @@ const unPinChatHandler =()=>{
             top: `${anchor.pageY}px`,
             //transform: 'translate(-50%, -50%)', // Optional for centering
           }}
-          className="bg-white shadow-lg rounded p-4 z-50"
+          className="bg-white shadow-lg rounded p-4 z-50 text-gray-500"
         >
           <ul>
             {pinnedChats?.includes(chatIdContextMenu) ?

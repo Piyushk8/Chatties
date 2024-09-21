@@ -11,7 +11,6 @@ const InputFieldItem = ({ option, index, selectedItem }) => {
     const handleCreateChat = async () => {
         try {
             const chatData= await createChat({ userId: option.id }).unwrap(); 
-            console.log(chatData)
             if(chatData.exists){
               return  nav(`/chat/${chatData.chatId}`)
             }

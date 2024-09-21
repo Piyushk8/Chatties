@@ -62,7 +62,7 @@ import { getSocket} from '../../socket';
         toast.success(data.message, {
           id: toastId,
         })
-         console.log(data)
+        console.log(data)
          if(data?.success===true){
            console.log(" authenticated")
           dispatch(setIsAuthenticated(true))
@@ -72,7 +72,7 @@ import { getSocket} from '../../socket';
 
       } catch (error) {
         console.log("error",error)
-        toast.error(error?.response?.message||"some error occured" , {
+        toast.error(error?.response?.data?.message||"some error occured" , {
           id: toastId,
         });
       } finally {
@@ -95,11 +95,11 @@ import { getSocket} from '../../socket';
           }
         }).then((res)=>{
           
-          if(res.data)toast.success(res.data.message)
+          if(res.data)toast.success(res?.data?.message||"error occured")
           //toast.error(res)
-          console.log("eee")
         })
-          .catch((err)=>console.log(err))
+          .catch((err)=>toast.error(err?.response?.data?.message||"some error occured")
+        )
           }
     
 

@@ -25,16 +25,13 @@ const appLayout = () =>(WrappedComponent)=> {
     const toggleButtonRef = useRef(null)
     const deleteOptionAnchor = useRef(null)
     
-    // useEffect(()=>{
-    // },[isChatList])
-    
     
     const [onlineUsers, setOnlineUsers] = useState(["hello"])
     
     const {data,isLoading,isError,error,refetch} = useMyChatsQuery()
-    const {user,Loader} = useSelector((state)=>state.auth) 
+    const {user} = useSelector((state)=>state.auth) 
     const {isChatList,isDeleteMenu} = useSelector((state)=>state.misc) 
-    const {pinnedChats} = useSelector((state)=>state.chat) 
+   // const {pinnedChats} = useSelector((state)=>state.chat) 
     
    
     
@@ -43,16 +40,22 @@ const appLayout = () =>(WrappedComponent)=> {
         refetch()
     },[refetch])
 
-    const refetchChatHandler = ({exists})=>{
-        if(exists) return
-       console.log("refteched on delete")
+    const refetchChatHandler = useCallback((data)=>{
+       refetch()
+       .then(() => {
+         console.log("refteched on delete",data)
+         // After refetching, navigate to the home page
+        // if(data===false || data ==="delete"){
+        //  nav('/');}
+       })
+       .catch((err) => {
+         console.error("Error while refetching chats:", err);
+       });
+       
+  },[refetch])
+    const newMessageAlertHandler = useCallback(({chatId})=>{
         refetch()
-
-  }
-    const newMessageAlertHandler = ({chatId})=>{
-         console.log("alert")
-        refetch()
-  }
+  },[refetch])
   
   const OnlineStatusChangeListener = useCallback(({userId})=>{
     setOnlineUsers(prev => {
@@ -62,7 +65,6 @@ const appLayout = () =>(WrappedComponent)=> {
             return prev;
         });
         refetch()
-        console.log("onlineuser",onlineUsers)
     },[])
     
 
@@ -89,7 +91,6 @@ const appLayout = () =>(WrappedComponent)=> {
     
     useEffect(() => {
       const handleClickOutside = (e) => {
-        console.log(chatListRef.current , "chatlist ref")
         if (
           chatListRef.current &&
           !chatListRef.current.contains(e.target) &&
