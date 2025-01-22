@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from "react-redux";
  import userAvatar from "../../assets/userAvatar.jpg";
 import { timeAgo } from "../../lib/helper";
 import { setIsChatList } from "../../redux/reducers/misc";
-import DeleteChatMenu from "../Dialogs/deleteChatMenu";
 
 const ChatItem = ({
   selected,
