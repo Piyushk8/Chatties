@@ -1,13 +1,10 @@
-import React, { lazy, useCallback, useEffect, useRef, useState } from "react";
+import React, { Fragment, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import Header from "./Header";
-import mainLogo from "../../assets/mainLogo.png";
 import { useMyChatsQuery } from "../../redux/reducers/api";
 import { getSocket } from "../../socket";
+import { motion } from "framer-motion"
 import {
-  I_AM_OFFLINE,
-  I_AM_ONLINE,
   InitialUsersStatus,
   NEW_MESSAGE,
   NEW_MESSAGE_ALERT,
@@ -20,11 +17,15 @@ import {
   setChatIdContextMenu,
   setIsChatList,
   setIsDeleteMenu,
+  setIsSideBarOpen,
 } from "../../redux/reducers/misc";
 import SearchInput from "../specific/InputField";
 import ChatLoaders from "./Loaders";
 import { setChatSelection } from "../../redux/reducers/chat";
 import Navbar from "./Navbar";
+import { MenuIcon, Settings } from "lucide-react";
+import { Button } from "../ui/button";
+import Sidebar from "../specific/SideBar";
 const ChatList = lazy(() => import("../specific/ChatList"));
 const DeleteChatMenu = lazy(() => import("../Dialogs/deleteChatMenu"));
 const appLayout = () => (WrappedComponent) => {
@@ -41,9 +42,9 @@ const appLayout = () => (WrappedComponent) => {
 
     const { data, isLoading, isError, error, refetch } = useMyChatsQuery();
     const { user } = useSelector((state) => state.auth);
-    const { isChatList, isDeleteMenu } = useSelector((state) => state.misc);
+    const { isChatList, isDeleteMenu ,isSideBarOpen} = useSelector((state) => state.misc);
     // const {pinnedChats} = useSelector((state)=>state.chat)
-
+console.log(isSideBarOpen)
     const OnlineListener = useCallback(
       ({ onlineUsersIds: users }) => {
         setOnlineUsers(users);
@@ -134,57 +135,45 @@ const appLayout = () => (WrappedComponent) => {
         window.addEventListener("click", handleClickOutside);
       }
       return () => {
+
         window.removeEventListener("click", handleClickOutside);
       };
     }, [isChatList]);
 
     return (
-      <div className=" h-100hv w-100vw ">
-        {/* header */}
-        <Navbar />
-
-        {isDeleteMenu && (
-          <DeleteChatMenu socket={socket} anchor={deleteOptionAnchor} />
-        )}
-
-        {/* togglechatlist */}
-        <div className="md:hidden flex pl-4 h-[2rem] w-full">
-          <button
-            onClick={() => {
-              dispatch(setIsChatList());
-              dispatch(setChatSelection("all"));
-            }}
-          >
-            <svg
-              ref={toggleButtonRef}
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={1.5}
-              stroke="currentColor"
-              className="size-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"
-              />
-            </svg>
-          </button>
-        </div>
-        {isChatList && (
-          <div
-            ref={chatListRef}
-            className="md:hidden fixed inset-x-1  z-30 bg-white shadow-2xl  w-[80%] mt-2 backdrop-blur-md h-[calc(100vh-10rem)]  flex-grow overflow-y-auto scrollbar-track-[#E7E7E7] scrollbar  "
-          >
-            <div className="px-5 mt-2 border-gray-100   ">
+      <div className="bg-background h-screen w-100vw font-mono overflow-hidden">
+      {/* header */}
+      <Navbar />
+    
+      {isDeleteMenu && (
+        <DeleteChatMenu socket={socket} anchor={deleteOptionAnchor} />
+      )}
+    
+      {/* togglechatlist */}
+      <div className="md:hidden shadow-2xl flex pl-4 h-[2rem] w-full">
+        <button
+          onClick={() => {
+            dispatch(setIsChatList());
+            dispatch(setChatSelection("all"));
+          }}
+        >
+          <MenuIcon ref={toggleButtonRef} size={20} className="text-foreground" />
+        </button>
+      </div>
+    
+      {isChatList && (
+        <motion.div
+          ref={chatListRef}
+          className="justify-between border border-border flex-col shadow-2xl md:hidden fixed inset-x-1 z-30 w-[75%] backdrop-blur-md h-[calc(100vh-6.5rem)] flex"
+        >
+          <div className="flex flex-col flex-grow overflow-hidden">
+            <div className="px-5 mt-2 mb-2">
               <SearchInput />
             </div>
-
             {isLoading ? (
               <ChatLoaders />
             ) : (
-              <div className="h-full flex-shrink overflow-y-auto">
+              <div className="bg-card flex-shrink overflow-y-auto">
                 <ChatList
                   handleDeleteChat={handleDeleteChat}
                   onlineUsers={onlineUsers}
@@ -194,43 +183,49 @@ const appLayout = () => (WrappedComponent) => {
               </div>
             )}
           </div>
-        )}
-
-        {/* MainArea */}
-        <div className="w-full h-[calc(100vh-6.3rem)] md:h-[calc(100vh-6.4rem)]">
-          <div className="md:h-full grid grid-cols-12">
-            {/* Left side - Search, Buttons, and Chat List */}
-            <div className="hidden overflow-hidden md:flex md:col-span-4 flex-col shadow-2xl">
-              {/* Search and Buttons - Fixed */}
-              <div className="flex-shrink-0">
-                <div className="px-4 py-2 border-b-2 border-gray-100">
-                  <SearchInput />
-                </div>
-              </div>
-              {/* Scrollable ChatList */}
-              <div className="flex-grow overflow-hidden">
-                {isLoading ? (
-                  <ChatLoaders />
-                ) : (
-                  <div className="h-full flex-shrink overflow-y-auto">
-                    <ChatList
-                      handleDeleteChat={handleDeleteChat}
-                      onlineUsers={onlineUsers}
-                      chatId={chatId}
-                      chatData={data}
-                    />
-                  </div>
-                )}
+        </motion.div>
+      )}
+    
+      {/* MainArea */}
+      <div className="bg-background w-full h-[calc(100vh-7rem)] md:h-[calc(100vh-7rem)]">
+        <div className="md:h-full grid grid-cols-12">
+          {/* Left side - Search, Buttons, and Chat List */}
+          <div className="hidden bg-card overflow-hidden md:flex md:col-span-4 flex-col shadow-lg border-r border-primary-foreground">
+            {/* Search and Buttons - Fixed */}
+            <div className="flex-shrink-0 border border-separate">
+              <div className="px-4 py-2 ">
+                <SearchInput />
               </div>
             </div>
-
-            {/* Right Side - Chat Page */}
-            <div className="col-span-12 md:col-span-8 flex flex-col h-[calc(100vh-6.3rem)] md:h-[calc(100vh-6.4rem)]">
-              <WrappedComponent user={user} chatId={chatId} {...props} />
+            {/* Scrollable ChatList */}
+            <div className="flex-grow overflow-hidden">
+              {isLoading ? (
+                <ChatLoaders />
+              ) : (
+                <div className="h-full flex-shrink overflow-y-auto">
+                  <ChatList
+                    handleDeleteChat={handleDeleteChat}
+                    onlineUsers={onlineUsers}
+                    chatId={chatId}
+                    chatData={data}
+                  />
+                </div>
+              )}
             </div>
           </div>
+    
+          {/* Right Side - Chat Page */}
+          <div className="col-span-12 md:col-span-8 flex flex-col h-[calc(100vh-6.3rem)] md:h-[calc(100vh-6.4rem)] shadow-md">
+            <WrappedComponent user={user} chatId={chatId} {...props} />
+          </div>
         </div>
+        <Button onClick={()=>dispatch(setIsSideBarOpen(true))} className="bg-secondary hover:bg-card ml-2 h-10 w-10 sticky bottom-2 left-0 rounded-full p-1">
+          <Settings size={20} className="text-primary" />
+        </Button>
+        <Sidebar user={user}/>
       </div>
+    </div>
+    
     );
   };
 };

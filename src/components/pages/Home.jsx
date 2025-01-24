@@ -1,50 +1,42 @@
-import React from 'react'
-import appLayout from '../Layout/appLayout'
-import { userNotExists } from '../../redux/reducers/auth'
-import { useDispatch } from 'react-redux'
-import axios from 'axios'
-import { server } from '../../constant/config'
-import toast from 'react-hot-toast'
+import React from "react";
+import appLayout from "../Layout/appLayout";
+import { useDispatch } from "react-redux";
+import { DotPattern } from "../ui/dot-pattern";
+import { cn } from "@/lib/utils";
+import { BlurFade } from "../ui/blur-fade";
 
-function Home(){
-  const dispatch = useDispatch()
-  const handleLogout=async()=>{
-    
-    try{const res =  await axios.delete (`${server}/api/v1/user/logout`,{withCredentials:true})
-    if(res.data.success==true) {
-      dispatch(userNotExists())
-      toast.success(res?.data?.message) }  
-  }catch(err){
-      console.log(err)
-    }
-  }
+function Home() {
+  const dispatch = useDispatch();
+
   return (
-    
-    <div className='h-full flex relative justify-center items-center w-full shadow-'>
-       <div onClick={handleLogout}  className='absolute top-2 right-4 cursor-pointer pr-2'>
-          <span class="material-symbols-outlined">
-          logout
-          </span> 
-          <div className=' text-[9px] text-gray-500'>logout</div>
+    <div className="relative bg-card h-full flex justify-center items-center w-full">
+      {/* Background Dot Pattern */}
+      <DotPattern
+        className={cn(
+          "[mask-image:radial-gradient(400px_circle_at_center,white,transparent)]" // Increased dot pattern size
+        )}
+      />
+      <div className="flex h-full flex-col items-center justify-center pl-8 w-[70%]">
+        {/* Header Section */}
+        <section id="header" className="flex flex-col justify-between">
+          <div className="mb-5">
+            <BlurFade delay={0.25} inView>
+              <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                Your Gateway to Instant <span className=" text-primary">Conversations.</span>
+              </h2>
+            </BlurFade>
           </div>
-        <div className='h-[60%] flex flex-col items-start pl-8 w-[70%] '> 
-          <span className='text-center mt-6 text-2xl font-bold text-gray-400'>
-            Real Time Chat App Crafted using
-           </span>
-          <span className='text-center mt-6 text-lg font-bold text-gray-400'>
-           - Socket.io  React NodeJs 
-           </span>
-          <span className='text-center mt-6 text-lg font-bold text-gray-400'>
-           - Drizzle Postgress
-           </span>
-          <span className='text-center mt-6 text-2xl font-bold text-[#EF6129]'>
-          Select a user From list or search to start a Chat
-           </span>
-        </div>
-    
-
+          <div>
+            <BlurFade delay={0.5} inView>
+              <span className="text-pretty text-xl tracking-tighter sm:text-3xl xl:text-4xl/none">
+                Real-time. Real Fast. Real Simple
+              </span>
+            </BlurFade>
+          </div>
+        </section>
+      </div>
     </div>
-  )
+  );
 }
 
 export default appLayout()(Home);

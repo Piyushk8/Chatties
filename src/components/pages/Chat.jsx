@@ -18,9 +18,14 @@ import {
 import { useSocketEvents } from "../../hooks/hook";
 import { getSocket } from "../../socket";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsFileMenu, setUserTyping } from "../../redux/reducers/misc";
+import { setIsChatDetailsBarOpen, setIsFileMenu, setUserTyping } from "../../redux/reducers/misc";
 import Header from "../Layout/Header";
+import { Paperclip, SendIcon } from "lucide-react";
+import { DotPattern } from "../ui/dot-pattern";
+import { cn } from "@/lib/utils";
+// import ChatDetailsSidebar from "../specific/ProfileSideBar";
 const FileMenu = lazy(() => import("../specific/FileMenu"));
+const ChatDetailsSidebar = lazy(() => import("../specific/ProfileSideBar"));
 const Chat = ({ chatId, user }) => {
   const { socket } = getSocket();
   const dispatch = useDispatch();
@@ -36,8 +41,7 @@ const Chat = ({ chatId, user }) => {
   const fileMenuRef = useRef(null);
   const bottomRef = useRef(null);
 
-  const { userTyping, isFileMenu } = useSelector((state) => state.misc);
-
+  const { userTyping, isFileMenu ,isChatDetailsBarOpen} = useSelector((state) => state.misc);
   const {
     data: chatDetails,
     refetch: refetchChatDetails,
@@ -45,6 +49,7 @@ const Chat = ({ chatId, user }) => {
     isLoading: chatDetailsLoading,
   } = useChatDetailsQuery({ id: chatId });
   const members = chatDetails?.members.map((member) => member?.userId);
+  console.log(chatDetails)
 
   useEffect(() => {
     if (!chatDetails && !isLoading) {
@@ -116,18 +121,18 @@ const Chat = ({ chatId, user }) => {
     (data) => {
       if (data.chatId !== chatId) return;
       // setUsertyping(true)
-      console.log(data,"istyping")
-      
+      console.log(data, "istyping");
+
       dispatch(setUserTyping(true));
     },
     [chatId]
   );
-  
+
   const stopTypingListener = useCallback(
-    ({data}) => {
+    ({ data }) => {
       if (data.chatId !== chatId) return;
       // setUsertyping(false)
-      console.log(data,"stooped")
+      console.log(data, "stooped");
       dispatch(setUserTyping(false));
     },
     [chatId]
@@ -197,17 +202,21 @@ const Chat = ({ chatId, user }) => {
       {isLoading ? (
         <></>
       ) : (
-        <div className="h-full w-full">
+        <div className="relative h-full w-full">
           {!chatDetailsLoading && (
             <Header user={chatDetails?.members[0]?.user} />
           )}
-
+           <DotPattern
+                  className={cn(
+                    "[mask-image:radial-gradient(250px_circle_at_center,gray,transparent)]" // Increased dot pattern size
+                  )}
+                />
           <div className="flex flex-col justify-between border-box  flex-1 h-[calc(100%-4rem)]">
             {/* chat area */}
 
             <div
               ref={containerRef}
-              className="overflow-y-scroll flex flex-col scrollbar-thin scrollbar-thumb-orange-400 pl-1 pr-2 md:pr-8"
+              className="overflow-y-scroll flex flex-col scrollbar-thin pl-1 pr-2 md:pr-8"
             >
               {messageSuccess &&
                 oldMessages?.map((message, index) => {
@@ -236,20 +245,20 @@ const Chat = ({ chatId, user }) => {
             </div>
 
             {/* send message area */}
-            <div className=" w-full ">
+            <div className=" w-full bg-card border border-separate">
               <form
                 onSubmit={SubmitHandler}
                 className="flex flex-col justify-center h-full w-full"
               >
                 <div className="flex gap-1 py-5 px-6 relative items-center justify-around w-full ">
                   <div
-                    className="bg-[#F6F6F6] p-1 flex gap-1 w-full items-center relative"
+                    className="p-1 flex gap-1 w-full items-center relative"
                     ref={fileMenuRef}
                   >
                     <input
                       type="text"
                       placeholder="send..."
-                      className="border-none bg-slate-100 rounded-xl  h-10 w-[90%]"
+                      className="border-primary-foreground bg-gray-200 rounded-xl  h-10 w-[90%]"
                       onChange={MessageOnChange}
                       value={message}
                     />
@@ -258,36 +267,10 @@ const Chat = ({ chatId, user }) => {
                       ref={fileMenuRef}
                       onClick={openFileMenu}
                     >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="#EF6144"
-                        className="size-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="m18.375 12.739-7.693 7.693a4.5 4.5 0 0 1-6.364-6.364l10.94-10.94A3 3 0 1 1 19.5 7.372L8.552 18.32m.009-.01-.01.01m5.699-9.941-7.81 7.81a1.5 1.5 0 0 0 2.112 2.13"
-                        />
-                      </svg>
+                      <Paperclip size={28} className="bg-primary-foreground rounded-2xl hover:bg-secondary p-1 text-primary"/>
                     </div>
-                    <div onClick={SubmitHandler} className="bg-[#FEE7E2] p-1">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="#DC4A2D"
-                        className="size-6"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
-                        />
-                      </svg>
+                    <div onClick={SubmitHandler} className="bg-primary-foreground rounded-2xl hover:bg-secondary">
+                        <SendIcon className="text-primary" size={20}/>
                     </div>
                   </div>
                 </div>
@@ -296,6 +279,9 @@ const Chat = ({ chatId, user }) => {
           </div>
         </div>
       )}
+      {
+       (!chatDetailsIsError&&!chatDetailsLoading) && <ChatDetailsSidebar chat={chatDetails} isOpen={isChatDetailsBarOpen} onClose={()=>dispatch(setIsChatDetailsBarOpen())}/>
+      }
     </>
   );
 };

@@ -1,11 +1,12 @@
-import React from 'react'
-import userAvatar from "../../assets/userAvatar.jpg"
-const Avatar = ({avatar}) => {
+import React from "react";
+import userAvatar from "../../assets/userAvatar.jpg";
+import { cn } from "@/lib/utils";
+const Avatar = ({ avatar ,className ,height=10,width=10,}) => {
   return (
-    <div class=" w-10 h-10 rounded-full shadow-md shadow-orange-300 ">
-    <img className="rounded-full w-10 h-10" src={avatar?.url || userAvatar} />
-  </div>
-  )
-}
+    <div class={cn(` w-${width} h-${height} flex justify-center items-center rounded-full`,className)}>
+      <img className={`rounded-full  w-${width} h-${height}`} src={avatar?.url || userAvatar} />
+    </div>
+  );
+};
 
-export default Avatar
+export default Avatar;

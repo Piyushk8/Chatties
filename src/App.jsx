@@ -11,6 +11,7 @@ import MainLoader from './components/Layout/MainLoader'
 
 import { Login } from './components/pages/Login'
 import { setPinnedChatsArray } from './redux/reducers/chat'
+import { ThemeProvider } from './components/theme-provider'
 //const {Login} = lazy(()=>import('./components/pages/Login'))
 const Chat = lazy(()=>import('./components/pages/Chat'))
 const Home = lazy(()=>import('./components/pages/Home'))
@@ -35,6 +36,7 @@ const App = () => {
   return Loader ? (
    <MainLoader/>
   ) : (
+    <ThemeProvider defaultTheme="dark" storageKey="vite-ui-theme">
     <BrowserRouter>
         <SocketProvider>
       <Suspense>
@@ -68,6 +70,7 @@ const App = () => {
 
       <Toaster position="bottom-center" />
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

@@ -4,7 +4,7 @@ import { useCreateChatMutation } from '../../redux/reducers/api';
 import Avatar from '../shared/Avatar';
 import toast from 'react-hot-toast';
 
-const InputFieldItem = ({ option, index, selectedItem }) => {
+const InputFieldItem = ({ option, index }) => {
     const [createChat, { isLoading, isError, isSuccess }] = useCreateChatMutation();
     const [creating, setCreating] = useState(false);
     const nav = useNavigate()
@@ -33,13 +33,13 @@ const InputFieldItem = ({ option, index, selectedItem }) => {
             <li
                 key={index}
                 onClick={handleCreateChat}
-                className={`${selectedItem === index ? 'bg-gray-200' : ''} p-2 pb-0 hover:bg-gray-200 cursor-pointer`}
+                className={`bg-card p-0.5 hover:bg-secondary cursor-pointer`}
             >
-                <div className="flex border-b-2 pb-4 justify-start my-3">
+                <div className="flex border bg-card border-primary-foreground border-b-2 p-4 justify-start">
                     <div className='mr-6'>
                         <Avatar avatar={option.avatar} />
                     </div>
-                    <div className="sm:text-lg sm:text-slate-400 font-semibold overflow-x-auto text-ellipsis md:text-xl">
+                    <div className="sm:text-lg sm:text-card-foreground font-semibold overflow-x-auto text-ellipsis md:text-lg">
                         {option.name}
                     </div>
                 </div>

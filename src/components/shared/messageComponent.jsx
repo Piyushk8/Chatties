@@ -20,7 +20,7 @@ const MessageComponent = ({ user, message }) => {
     >
       <div
         className={`p-3 rounded-lg     my-0.5 md:mt-2  flex flex-col  min-h-11 h-fit ${
-          sameSender ? `text-white bg-[#EF6144]` : `bg-[#F6F6F6]`
+          sameSender ? `text-primary-foreground bg-primary` : `bg-secondary text-secondary-foreground`
         }`}
       >
         {content ? <div>{content}</div> : ""}
@@ -45,8 +45,8 @@ const MessageComponent = ({ user, message }) => {
             })}
         </div>
       </div>
-      <div className="self-end w-full h-fit text-[8px] p-0 bg-white text-[#B0B0B0] ${sameSender?`text-white bg-orange-500`:`bg-slate-200`}">
-        {sameSender ? `read ${timeAgo}` : `${timeAgo}`}
+      <div className="self-end w-full h-fit text-[8px] p-0 text-[#B0B0B0] ${sameSender?`text-white bg-orange-500`:`bg-slate-200`}">
+        {sameSender ? `sent ${timeAgo}` : `${timeAgo}`}
       </div>
     </div>
   );

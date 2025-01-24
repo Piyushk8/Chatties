@@ -1,137 +1,116 @@
-import React, { useState, useEffect, useRef } from 'react';
-import axios from 'axios';
-import { server } from '../../constant/config';
-import Avatar from '../shared/Avatar';
-import InputFieldItem from './InputFieldItem';
+import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
+import { server } from "../../constant/config";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "../ui/dialog";
+import { Loader2, SearchIcon } from "lucide-react";
+import InputFieldItem from "./InputFieldItem";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsSearch } from "@/redux/reducers/misc";
 
-const SearchInput = () => {
-    const [query, setQuery] = useState('');
-    const [options, setOptions] = useState([]);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
-    const [isOpen, setIsOpen] = useState(false); // State to control dropdown visibility
-    const [selectedItem, setselectedItem] = useState(-1)
-    
-    const OptionRef = useRef(null); // Ref to the dropdown container
-    const InputRef = useRef(null); // Ref to the dropdown container
-
-
-    
-  window.addEventListener("click",(e)=>{
-    if(e.target !== OptionRef.current && e.target !==InputRef.current ){
-      setIsOpen(false)
-    }
-  })
-
-    useEffect(() => {
-        const fetchOptions = async () => {
-            if (query.length === 0) {
-                setOptions([]);
-                return;
-            }
-
-            setIsLoading(true);
-            setError(null);
-            try {
-                // Fetch data from the API
-                const response = await axios.get(`${server}/api/v1/user/search?filter=${query}`, { withCredentials: true });
-                console.log(response)
-                setOptions(response.data.users); // Ensure correct response structure
-            } catch (err) {
-                console.error("Error fetching options:", err);
-                setError("Failed to load options");
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
-        fetchOptions();
-
-    }, [query]); // Fetch new options when query changes
-
-
-    // Toggle dropdown visibility
-    const handleInputClick = () => {
-        setIsOpen(true);
-    };
-    const handleClearClick = () => {
-        setQuery("");
-        setOptions([])
-    };
-    const handleKeyDown=(e)=>{
-       if(selectedItem<options.length){
-        if(e.key === "ArrowUp" && selectedItem >0){
-            setselectedItem((prev)=>prev-1)
-        }
-        else if(e.key === "ArrowDown" && selectedItem<options.length-1){
-            setselectedItem((prev)=>prev+1)
-        }
-        else if(e.key === "Enter" && selectedItem>=0){
-            //!create chat
-            console.log("enter")
-        }
-       }
-       else{
-        setselectedItem(-1)
-       }
-    }
-    const inputOnChange = (e)=>{
-        e.preventDefault();
-        setQuery(e.target.value);
-        handleInputClick()
+const SearchInputWithDialog = () => {
+  const [query, setQuery] = useState("");
+  const [options, setOptions] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  // const [isOpen, setIsOpen] = useState(false);
+  const {isSearchOpen} = useSelector((state)=>state.misc)
+  const dispatch = useDispatch()
+  const fetchOptions = async () => {
+    if (query.length === 0) {
+      setOptions([]);
+      return;
     }
 
-    return (
-        <div className="relative w-full">
-                        
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = await axios.get(
+        `${server}/api/v1/user/search?filter=${query}`,
+        { withCredentials: true }
+      );
+      setOptions(response.data.users || []);
+    } catch (err) {
+      setError("Failed to load options");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    const delayDebounce = setTimeout(() => {
+      if (query) fetchOptions();
+    }, 300); // Debounce input
+
+    return () => clearTimeout(delayDebounce);
+  }, [query]);
+
+  const handleInputChange = (e) => {
+    setQuery(e.target.value);
+  };
+
+  const handleInputClick = () => {
+    dispatch(setIsSearch(true))
+  };
+  
+  const handleDialogClose = () => {
+    dispatch(setIsSearch(false))
+    setQuery("");
+    setOptions([]);
+  };
+
+  return (
+    <div>
+      <div className="relative">
+        <input
+          type="text"
+          onClick={handleInputClick}
+          className="w-full bg-input text-primary p-2 border border-border rounded"
+          placeholder="Search..."
+          readOnly
+        />
+        <SearchIcon size={20} className="text-primary absolute top-3 right-3 opacity-50" />
+      </div>
+
+      <Dialog open={isSearchOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Search for Users and Channels</DialogTitle>
+          </DialogHeader>
+          <div className="relative">
             <input
-            ref={InputRef}
-            type="text"
-            value={query}
-            // onClick={handleInputClick}
-            onChange={inputOnChange}
-            className="w-full p-2 border border-gray-300 rounded"
-            placeholder="Search..."
-            onKeyDown={handleKeyDown}
+              type="text"
+              value={query}
+              onChange={handleInputChange}
+              className="w-full bg-input p-2 border border-border rounded mb-2"
+              placeholder="Type to search..."
             />
-            {/* <div><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-            </svg>
-            </div> */}
-            {isOpen && (<>
-
             {isLoading && (
-            <div className="absolute top-full left-0 right-0 p-2 bg-white border border-t-0 border-gray-300 rounded-b">
-                Loading...
-            </div>
+              <Loader2
+                size={20}
+                className="absolute right-3 top-3 animate-spin"
+              />
             )}
-            {error && (
-            <div className="absolute top-full left-0 right-0 p-2 bg-white border border-t-0 border-gray-300 rounded-b text-red-500">
-                {error}
-            </div>
-            )}
-            {options.length > 0 && (
-
-            <div 
-                className="w-full hover:text-white p-2 rounded-xl shadow-sm   absolute scrollbar-none top-full  left-0 right-0 max-h-[60rem] overflow-y-auto bg-white border border-t-0 border-gray-300 rounded-b z-10"
-                >
-            <ul 
-                ref={OptionRef}
-                >
+          </div>
+          {error && <p className="text-red-500 text-sm">{error}</p>}
+          <div className="mt-2 max-h-60 overflow-y-auto">
+            {options.length > 0 ? (
+              <ul>
                 {options.map((option, index) => (
-                  <InputFieldItem selectedItem={selectedItem} option={option} index={index} />
+                  <InputFieldItem
+                    // selectedItem={selectedItem}
+                    option={option}
+                    index={index}
+                  />
                 ))}
-            </ul>
-            </div>
+              </ul>
+            ) : (
+              !isLoading && <p className="text-secondary">No results found</p>
             )}
-
-
-</>)}
-        </div>
-    );
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 };
 
-export default SearchInput;
-
-
-
+export default SearchInputWithDialog;

@@ -1,7 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  isSearch: false,
+  isSearchOpen: false,
   isFileMenu: false,
   isDeleteMenu: false,
   uploadingLoader: false,
@@ -11,7 +11,9 @@ const initialState = {
   },
   chatIdContextMenu:null,
   userTyping:false,
-  ProfileMenu:false
+  ProfileMenu:false,
+  isChatDetailsBarOpen:false
+  ,isSideBarOpen:false
   ,isChatList:false
 };
 
@@ -19,11 +21,17 @@ const miscSlice = createSlice({
   name: "misc",
   initialState,
   reducers: {
-    setIsSearch: (state, action) => {
-      state.isSearch = action.payload;
+    setIsSearch: (state,action) => {
+      state.isSearchOpen = action.payload
+    },
+    setIsChatDetailsBarOpen: (state) => {
+      state.isChatDetailsBarOpen = !state.isChatDetailsBarOpen;
     },
     setIsFileMenu: (state) => {
       state.isFileMenu = !state.isFileMenu
+    },
+    setIsSideBarOpen: (state,action) => {
+      state.isSideBarOpen = action.payload
     },
     setIsDeleteMenu: (state, action) => {
       state.isDeleteMenu = action.payload;
@@ -57,7 +65,9 @@ const miscSlice = createSlice({
 
 export default miscSlice;
 export const {setProfileMenu,
+  setIsSideBarOpen,
   closeChatList,
+  setIsChatDetailsBarOpen,
   setIsChatList,
 setUserTyping,
   setIsSearch,
