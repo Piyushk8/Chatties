@@ -5,10 +5,8 @@ import { useSelector } from "react-redux";
 import moment from "moment";
 
 const MessageComponent = ({ user, message }) => {
-  //console.log(message)
   const { sender, content, attachment = [], createdAt } = message;
   const sameSender = sender?.id || sender === user?.id;
-  console.log(sender, sameSender, user?.id);
   const timeAgo = moment(createdAt).fromNow();
   return (
     <div

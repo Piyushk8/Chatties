@@ -64,7 +64,7 @@ const SearchInputWithDialog = () => {
         <input
           type="text"
           onClick={handleInputClick}
-          className="w-full bg-input text-primary p-2 border border-border rounded"
+          className="w-full bg-input dark:bg-card-foreground border-primary text-primary p-2 border-none dark:border-[1px]  rounded-lg"
           placeholder="Search..."
           readOnly
         />

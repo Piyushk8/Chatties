@@ -4,16 +4,19 @@ import { useDispatch } from "react-redux";
 import { DotPattern } from "../ui/dot-pattern";
 import { cn } from "@/lib/utils";
 import { BlurFade } from "../ui/blur-fade";
-
+import {motion} from "framer-motion"
+import { ThemeProvider, useTheme } from "../theme-provider";
 function Home() {
   const dispatch = useDispatch();
-
+  const {theme} = useTheme()
   return (
-    <div className="relative bg-card h-full flex justify-center items-center w-full">
+    <div 
+    className="relative  bg-card h-full flex justify-center items-center w-full">
       {/* Background Dot Pattern */}
       <DotPattern
         className={cn(
-          "[mask-image:radial-gradient(400px_circle_at_center,white,transparent)]" // Increased dot pattern size
+          `[mask-image:radial-gradient(400px_circle_at_center,white,transparent)]`,"animate glow-effect" 
+           // Increased dot pattern size
         )}
       />
       <div className="flex h-full flex-col items-center justify-center pl-8 w-[70%]">

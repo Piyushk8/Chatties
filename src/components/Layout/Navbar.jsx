@@ -29,12 +29,16 @@ import { useTheme } from "@/components/theme-provider.jsx";
 import SearchInput from "../specific/InputField";
 import Sidebar from "../specific/SideBar";
 import { setIsSearch } from "@/redux/reducers/misc";
+import axios from "axios";
+import { server } from "@/constant/config";
+import { userNotExists } from "@/redux/reducers/auth";
 
 const Navbar = () => {
   const { setTheme, theme } = useTheme();
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch()
   const nav = useNavigate()
+
  
   const handleLogout = async () => {
     try {

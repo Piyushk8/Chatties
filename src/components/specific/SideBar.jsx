@@ -16,12 +16,13 @@ import {
   SheetTrigger 
 } from "@/components/ui/sheet";
 import { useDispatch, useSelector } from 'react-redux';
-import { setIsChatList, setIsSideBarOpen } from '@/redux/reducers/misc';
+import { setIsChatList, setIsCreateGroup, setIsSideBarOpen } from '@/redux/reducers/misc';
 
 const Sidebar = ({ user }) => {
   const [activeTab, setActiveTab] = useState('chats');
-     const {isSideBarOpen} = useSelector((state) => state.misc)
+     const {isSideBarOpen,isCreateGroup} = useSelector((state) => state.misc)
   const dispatch = useDispatch()
+  console.log(isCreateGroup)
   const sidebarItems = [
     { 
       icon: MessageCircle, 
@@ -29,11 +30,14 @@ const Sidebar = ({ user }) => {
       key:()=>{ 
          dispatch(setIsChatList())
         dispatch(setIsSideBarOpen(false))} 
-    },
-    { 
-      icon: Camera, 
-      name: 'Status', 
-      key: 'status' 
+      },
+      { 
+        icon: Camera, 
+        name: 'create group', 
+        key:()=>{
+          dispatch(setIsCreateGroup(true))
+          dispatch(setIsSideBarOpen(false)) 
+      } 
     },
     { 
       icon: Image, 

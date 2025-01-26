@@ -122,16 +122,16 @@ const Login = () => {
     }
   };
   return (
-    <div className="relative flex items-center justify-center min-h-screen w-screen overflow-hidden">
+    <div className="relative  flex items-center justify-center min-h-screen w-screen overflow-hidden">
       {/* Background Layer */}
-      <div className="absolute inset-0 -z-10 flex justify-center items-center bg-background">
+      {/* <div className="absolute inset-0 -z-10 flex justify-center items-center bg-background"> */}
         <DotPattern
           className={cn(
-            "w-[100%] h-[80%] opacity-60 scale-200",
-            "[mask-image:radial-gradient(circle,rgba(255,255,255,1),transparent)]",
+            "w-[100%] h-[100%] opacity-60 scale-200",
+            "[mask-image:radial-gradient(600px_circle,white,transparent)]",
             "animate-pulse glow-effect" )}
         />
-      </div>
+      {/* </div> */}
 
       {/* Login / Signup Content */}
       <div className="relative font-mono  z-10 flex flex-col items-center justify-center w-full h-full">
@@ -160,7 +160,7 @@ const Login = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full px-4 text-gray-500 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 {passwordToggle ? (
                   <EyeClosed
@@ -206,7 +206,8 @@ const Login = () => {
               Sign Up
             </h2>
             <form onSubmit={handleSignUp} className="space-y-4">
-              <div className="relative flex flex-col items-center">
+              <div className=" flex flex-col items-center">
+                <div className="relative rounded-full w-20 h-20 bg-red-200">
                 <img
                   src={previewImgUrl || userAvatar}
                   alt="Avatar"
@@ -214,13 +215,14 @@ const Login = () => {
                 />
                 <label
                   htmlFor="file-upload"
-                  className="relative cursor-pointer"
+                  className="cursor-pointer"
                 >
                   <FaCamera
-                    size={50}
-                    className="absolute bottom-1 right-1 text-gray-800 z-10"
+                    size={30}
+                    className="absolute bottom-1 right-0 text-muted z-10"
                   />
                 </label>
+                </div>
                 <input
                   id="file-upload"
                   type="file"
@@ -239,7 +241,7 @@ const Login = () => {
                   placeholder="Username"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
-                  className="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full text-gray-500 px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div>
@@ -251,7 +253,7 @@ const Login = () => {
                   placeholder="Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full px-4 text-gray-500 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
                 />
               </div>
               <div className="relative">
@@ -260,7 +262,7 @@ const Login = () => {
                   placeholder="Password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                  className="w-full text-gray-500 px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
                 />
                 {passwordToggle ? (
                   <EyeClosed

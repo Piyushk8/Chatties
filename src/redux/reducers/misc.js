@@ -15,6 +15,7 @@ const initialState = {
   isChatDetailsBarOpen:false
   ,isSideBarOpen:false
   ,isChatList:false
+  ,isCreateGroup:false
 };
 
 const miscSlice = createSlice({
@@ -23,6 +24,9 @@ const miscSlice = createSlice({
   reducers: {
     setIsSearch: (state,action) => {
       state.isSearchOpen = action.payload
+    },
+    setIsCreateGroup: (state,action) => {
+      state.isCreateGroup = action.payload
     },
     setIsChatDetailsBarOpen: (state) => {
       state.isChatDetailsBarOpen = !state.isChatDetailsBarOpen;
@@ -65,6 +69,7 @@ const miscSlice = createSlice({
 
 export default miscSlice;
 export const {setProfileMenu,
+  setIsCreateGroup,
   setIsSideBarOpen,
   closeChatList,
   setIsChatDetailsBarOpen,

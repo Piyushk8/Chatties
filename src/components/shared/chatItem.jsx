@@ -35,7 +35,7 @@ const ChatItem = ({
       to={`/chat/${_id}`}
       onClick={() => dispatch(setIsChatList())}
       onContextMenu={(e) => handleDeleteChat(e, _id, groupChat)}
-      className={`border-b-2 border-b-primary-foreground ${
+      className={`border-b border-b-accent ${
         selected ? "bg-card  border border-l-4 border-l-primary " : ""
       }   hover:bg-secondary  w-full  px-3 py-3  md:px-[1.4rem] ${
         sameSender ? "bg-[#054640] text-white" : "bg-transparent text-black"

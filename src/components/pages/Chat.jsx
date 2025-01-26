@@ -18,13 +18,18 @@ import {
 import { useSocketEvents } from "../../hooks/hook";
 import { getSocket } from "../../socket";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsChatDetailsBarOpen, setIsFileMenu, setUserTyping } from "../../redux/reducers/misc";
+import {
+  setIsChatDetailsBarOpen,
+  setIsFileMenu,
+  setUserTyping,
+} from "../../redux/reducers/misc";
 import Header from "../Layout/Header";
 import { Paperclip, SendIcon } from "lucide-react";
 import { DotPattern } from "../ui/dot-pattern";
 import { cn } from "@/lib/utils";
+import FileMenu from "../specific/FileMenu";
 // import ChatDetailsSidebar from "../specific/ProfileSideBar";
-const FileMenu = lazy(() => import("../specific/FileMenu"));
+// const FileMenu = lazy(() => import("../specific/FileMenu"));
 const ChatDetailsSidebar = lazy(() => import("../specific/ProfileSideBar"));
 const Chat = ({ chatId, user }) => {
   const { socket } = getSocket();
@@ -35,13 +40,17 @@ const Chat = ({ chatId, user }) => {
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [MeTyping, setMeTyping] = useState(false);
-
+  const [draggedOver, setDraggedOver] = useState(false);
   const typingtimeOut = useRef(null);
   const containerRef = useRef(null);
   const fileMenuRef = useRef(null);
   const bottomRef = useRef(null);
+  const dropZoneRef = useRef(null);
+  const dragCounter = useRef(0);
 
-  const { userTyping, isFileMenu ,isChatDetailsBarOpen} = useSelector((state) => state.misc);
+  const { userTyping, isFileMenu, isChatDetailsBarOpen } = useSelector(
+    (state) => state.misc
+  );
   const {
     data: chatDetails,
     refetch: refetchChatDetails,
@@ -49,7 +58,6 @@ const Chat = ({ chatId, user }) => {
     isLoading: chatDetailsLoading,
   } = useChatDetailsQuery({ id: chatId });
   const members = chatDetails?.members.map((member) => member?.userId);
-  console.log(chatDetails)
 
   useEffect(() => {
     if (!chatDetails && !isLoading) {
@@ -85,7 +93,17 @@ const Chat = ({ chatId, user }) => {
     //error handling page logic
   };
 
+  //DropZoneHandlers
+
   //!all handlers
+  const handleFileUpload = (files) => {
+    const file = files[0];
+    // Implement your file upload logic here
+    console.log(file);
+  };
+
+
+
   const SubmitHandler = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
@@ -180,19 +198,6 @@ const Chat = ({ chatId, user }) => {
   useSocketEvents(socket, eventHandlers);
 
   useEffect(() => {
-    // socket.emit(CHAT_JOINED,{userId:user._id,members})
-    //dispatch(removeNewMessagesAlert(chatId))
-
-    return () => {
-      setMessages([]);
-      setMessage("");
-      setOldMessages([]);
-      setpage(1);
-      // socket.emit(CHAT_LEFT,{userId:user._id,members})
-    };
-  }, [chatId]);
-
-  useEffect(() => {
     if (bottomRef.current)
       bottomRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
@@ -202,22 +207,61 @@ const Chat = ({ chatId, user }) => {
       {isLoading ? (
         <></>
       ) : (
-        <div className="relative h-full w-full">
+        <div
+          onDragEnter={(e) => {
+            e.preventDefault(); // Necessary to allow dropping
+            console.log("entered");
+            dragCounter.current += 1; // Increment counter
+            if (dragCounter.current === 1) {
+              setDraggedOver(true);
+            }
+          }}
+          onDragOver={(e) => {
+            e.preventDefault(); // Necessary to allow dropping
+           }}
+          onDragLeave={(e) => {
+            e.preventDefault();
+            dragCounter.current -= 1; // Increment counter
+            if (dragCounter.current === 0) {
+              setDraggedOver(false);
+            }
+           }}
+          onDrop={(e) => {
+            e.preventDefault();
+            setDraggedOver(false);
+            dragCounter.current = 0;
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+              handleFileUpload(files);
+            }
+          }}
+          className="z-0 relative h-full w-full"
+        >
           {!chatDetailsLoading && (
             <Header user={chatDetails?.members[0]?.user} />
           )}
-           <DotPattern
-                  className={cn(
-                    "[mask-image:radial-gradient(250px_circle_at_center,gray,transparent)]" // Increased dot pattern size
-                  )}
-                />
-          <div className="flex flex-col justify-between border-box  flex-1 h-[calc(100%-4rem)]">
+          <DotPattern
+            className={cn(
+              "[mask-image:radial-gradient(250px_circle_at_center,gray,transparent)]" // Increased dot pattern size
+            )}
+          />
+          <div
+            className={`flex flex-col justify-between border-box  flex-1 h-[calc(100%-4rem)]`}
+          >
             {/* chat area */}
 
             <div
               ref={containerRef}
-              className="overflow-y-scroll flex flex-col scrollbar-thin pl-1 pr-2 md:pr-8"
+              className={`relative overflow-y-scroll flex flex-col scrollbar-thin scrollbar-track-primary-foreground p-2 pl-1 pr-2 md:pr-8 ${
+                draggedOver ? "border-primary border-dashed border-2" : ""
+              }`}
             >
+              {draggedOver && (
+                <div className="absolute top-0 left-0 w-full h-full z-50 bg-black/70 text-white text-3xl font-bold flex justify-center items-center">
+                  Drop file here
+                </div>
+              )}
               {messageSuccess &&
                 oldMessages?.map((message, index) => {
                   return (
@@ -267,10 +311,16 @@ const Chat = ({ chatId, user }) => {
                       ref={fileMenuRef}
                       onClick={openFileMenu}
                     >
-                      <Paperclip size={28} className="bg-primary-foreground rounded-2xl hover:bg-secondary p-1 text-primary"/>
+                      <Paperclip
+                        size={28}
+                        className="bg-primary-foreground rounded-2xl hover:bg-secondary p-1 text-primary"
+                      />
                     </div>
-                    <div onClick={SubmitHandler} className="bg-primary-foreground rounded-2xl hover:bg-secondary">
-                        <SendIcon className="text-primary" size={20}/>
+                    <div
+                      onClick={SubmitHandler}
+                      className="bg-primary-foreground rounded-2xl hover:bg-secondary"
+                    >
+                      <SendIcon className="text-primary" size={20} />
                     </div>
                   </div>
                 </div>
@@ -279,9 +329,13 @@ const Chat = ({ chatId, user }) => {
           </div>
         </div>
       )}
-      {
-       (!chatDetailsIsError&&!chatDetailsLoading) && <ChatDetailsSidebar chat={chatDetails} isOpen={isChatDetailsBarOpen} onClose={()=>dispatch(setIsChatDetailsBarOpen())}/>
-      }
+      {!chatDetailsIsError && !chatDetailsLoading && (
+        <ChatDetailsSidebar
+          chat={chatDetails}
+          isOpen={isChatDetailsBarOpen}
+          onClose={() => dispatch(setIsChatDetailsBarOpen())}
+        />
+      )}
     </>
   );
 };

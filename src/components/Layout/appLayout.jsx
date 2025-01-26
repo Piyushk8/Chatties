@@ -26,6 +26,7 @@ import Navbar from "./Navbar";
 import { MenuIcon, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import Sidebar from "../specific/SideBar";
+import CreateGroupDialog from "../Dialogs/CreateGroupDialog";
 const ChatList = lazy(() => import("../specific/ChatList"));
 const DeleteChatMenu = lazy(() => import("../Dialogs/deleteChatMenu"));
 const appLayout = () => (WrappedComponent) => {
@@ -42,9 +43,8 @@ const appLayout = () => (WrappedComponent) => {
 
     const { data, isLoading, isError, error, refetch } = useMyChatsQuery();
     const { user } = useSelector((state) => state.auth);
-    const { isChatList, isDeleteMenu ,isSideBarOpen} = useSelector((state) => state.misc);
+    const { isChatList, isCreateGroup ,isDeleteMenu ,isSideBarOpen} = useSelector((state) => state.misc);
     // const {pinnedChats} = useSelector((state)=>state.chat)
-console.log(isSideBarOpen)
     const OnlineListener = useCallback(
       ({ onlineUsersIds: users }) => {
         setOnlineUsers(users);
@@ -148,6 +148,9 @@ console.log(isSideBarOpen)
       {isDeleteMenu && (
         <DeleteChatMenu socket={socket} anchor={deleteOptionAnchor} />
       )}
+      {
+        isCreateGroup && (<CreateGroupDialog/>)
+      }
     
       {/* togglechatlist */}
       <div className="md:hidden shadow-2xl flex pl-4 h-[2rem] w-full">
