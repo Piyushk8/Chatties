@@ -4,10 +4,11 @@ import RenderContent from "./RenderComponent";
 import { useSelector } from "react-redux";
 import moment from "moment";
 
-const MessageComponent = ({ user, message }) => {
+const MessageComponent = ({ user, message ,group}) => {
   const { sender, content, attachment = [], createdAt } = message;
-  const sameSender = sender?.id || sender === user?.id;
+  const sameSender =  sender?.id === user?.id;
   const timeAgo = moment(createdAt).fromNow();
+
   return (
     <div
       style={{

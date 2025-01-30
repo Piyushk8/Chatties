@@ -1,11 +1,12 @@
 import React, { Fragment, lazy, useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import { useMyChatsQuery } from "../../redux/reducers/api";
+import { useMyChatsQuery, useMyGroupsQuery } from "../../redux/reducers/api";
 import { getSocket } from "../../socket";
 import { motion } from "framer-motion"
 import {
   InitialUsersStatus,
+  MARK_MESSAGES_READ,
   NEW_MESSAGE,
   NEW_MESSAGE_ALERT,
   ONLINE_USER,
@@ -15,36 +16,41 @@ import { useSocketEvents } from "../../hooks/hook";
 import {
   closeChatList,
   setChatIdContextMenu,
+  setGroupIdContextMenu,
   setIsChatList,
   setIsDeleteMenu,
+  setIsGroupMenuOpen,
   setIsSideBarOpen,
 } from "../../redux/reducers/misc";
 import SearchInput from "../specific/InputField";
 import ChatLoaders from "./Loaders";
-import { setChatSelection } from "../../redux/reducers/chat";
+import { setChatSelection, updateUnreadCount } from "../../redux/reducers/chat";
 import Navbar from "./Navbar";
 import { MenuIcon, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import Sidebar from "../specific/SideBar";
 import CreateGroupDialog from "../Dialogs/CreateGroupDialog";
+import GroupList from "../specific/groupList";
+import { GroupContextMenu } from "../Dialogs/groupContextMenu";
 const ChatList = lazy(() => import("../specific/ChatList"));
 const DeleteChatMenu = lazy(() => import("../Dialogs/deleteChatMenu"));
 const appLayout = () => (WrappedComponent) => {
   return (props) => {
     const { socket } = getSocket();
-    //console.log(socket)
     const nav = useNavigate();
     const dispatch = useDispatch();
     const params = useParams();
     const chatId = params.chatId;
+    const groupId = params.groupId;
     const chatListRef = useRef(null);
     const toggleButtonRef = useRef(null);
     const deleteOptionAnchor = useRef(null);
 
     const { data, isLoading, isError, error, refetch } = useMyChatsQuery();
+    const { data:groupData, isLoading:myGroupsLoading, isError:LoadingGroupsError, error:GroupQueryError, refetch:refetchGroups } = useMyGroupsQuery();
     const { user } = useSelector((state) => state.auth);
-    const { isChatList, isCreateGroup ,isDeleteMenu ,isSideBarOpen} = useSelector((state) => state.misc);
-    // const {pinnedChats} = useSelector((state)=>state.chat)
+    const { isChatList, isCreateGroup ,isGroupMenuOpen,isDeleteMenu} = useSelector((state) => state.misc);
+
     const OnlineListener = useCallback(
       ({ onlineUsersIds: users }) => {
         setOnlineUsers(users);
@@ -53,7 +59,7 @@ const appLayout = () => (WrappedComponent) => {
       },
       [refetch]
     );
-
+    // console.log(groupData)
     const refetchChatHandler = useCallback(
       (data) => {
         refetch()
@@ -69,7 +75,10 @@ const appLayout = () => (WrappedComponent) => {
       [refetch]
     );
     const newMessageAlertHandler = useCallback(
-      ({ chatId }) => {
+      (data) => {
+        // console.log("new messag alert ")
+        // console.log(data)
+        dispatch(updateUnreadCount(data))
         refetch();
       },
       [refetch]
@@ -101,7 +110,7 @@ const appLayout = () => (WrappedComponent) => {
 
     const eventHandlers = {
       [NEW_MESSAGE_ALERT]: newMessageAlertHandler,
-      // [NEW_MESSAGE]:newMessagesHandler,
+      // [MARK_MESSAGES_READ]:markasread,
       [REFETECH_CHATS]: refetchChatHandler,
       [InitialUsersStatus]: OnlineListener,
       ["userStatusChange"]: OnlineStatusChangeListener,
@@ -110,9 +119,15 @@ const appLayout = () => (WrappedComponent) => {
 
     const handleDeleteChat = (e, _id, chatRef, groupChat) => {
       e.preventDefault();
+      console.log(_id,e,chatRef,groupChat,"herere")
       deleteOptionAnchor.current = e.currentTarget;
       deleteOptionAnchor.pageX = e.pageX;
       deleteOptionAnchor.pageY = e.pageY;
+      if(groupChat) {
+        dispatch(setGroupIdContextMenu(_id));
+        return dispatch(setIsGroupMenuOpen(true));
+        
+      }
       dispatch(setChatIdContextMenu(_id));
       dispatch(setIsDeleteMenu(true));
       //   dispatch(setSelectedDeleteChat({chatId,_id,groupChat}))
@@ -141,19 +156,22 @@ const appLayout = () => (WrappedComponent) => {
     }, [isChatList]);
 
     return (
-      <div className="bg-background h-screen w-100vw font-mono overflow-hidden">
+      <div className="h-screen w-100vw font-mono overflow-hidden">
       {/* header */}
       <Navbar />
     
       {isDeleteMenu && (
         <DeleteChatMenu socket={socket} anchor={deleteOptionAnchor} />
       )}
+      {isGroupMenuOpen && (
+        <GroupContextMenu socket={socket} anchor={deleteOptionAnchor} />
+      )}
       {
         isCreateGroup && (<CreateGroupDialog/>)
       }
     
       {/* togglechatlist */}
-      <div className="md:hidden shadow-2xl flex pl-4 h-[2rem] w-full">
+      <div className="md:hidden  shadow-2xl flex pl-4 h-[2rem] w-full">
         <button
           onClick={() => {
             dispatch(setIsChatList());
@@ -167,13 +185,13 @@ const appLayout = () => (WrappedComponent) => {
       {isChatList && (
         <motion.div
           ref={chatListRef}
-          className="justify-between border border-border flex-col shadow-2xl md:hidden fixed inset-x-1 z-30 w-[75%] backdrop-blur-md h-[calc(100vh-6.5rem)] flex"
+          className="justify-between border border-border flex-col inset-x-1 z-30 shadow-2xl md:hidden fixed w-[75%] backdrop-blur-md h-[calc(100vh-6.5rem)] flex"
         >
           <div className="flex flex-col flex-grow overflow-hidden">
             <div className="px-5 mt-2 mb-2">
               <SearchInput />
             </div>
-            {isLoading ? (
+            {isLoading && myGroupsLoading? (
               <ChatLoaders />
             ) : (
               <div className="bg-card flex-shrink overflow-y-auto">
@@ -182,7 +200,14 @@ const appLayout = () => (WrappedComponent) => {
                   onlineUsers={onlineUsers}
                   chatId={chatId}
                   chatData={data}
+                  myGroups={groupData?.myGroups}
+                  groupId={groupId}
                 />
+                {/* <GroupList
+                  handleDeleteChat={handleDeleteChat}
+                  groupId={groupId}
+                  groupData={myGroups}
+                /> */}
               </div>
             )}
           </div>
@@ -202,7 +227,7 @@ const appLayout = () => (WrappedComponent) => {
             </div>
             {/* Scrollable ChatList */}
             <div className="flex-grow overflow-hidden">
-              {isLoading ? (
+              {isLoading && myGroupsLoading? (
                 <ChatLoaders />
               ) : (
                 <div className="h-full flex-shrink overflow-y-auto">
@@ -211,6 +236,8 @@ const appLayout = () => (WrappedComponent) => {
                     onlineUsers={onlineUsers}
                     chatId={chatId}
                     chatData={data}
+                    groupId={groupId}
+                    myGroups={groupData?.myGroups}
                   />
                 </div>
               )}
@@ -219,10 +246,10 @@ const appLayout = () => (WrappedComponent) => {
     
           {/* Right Side - Chat Page */}
           <div className="col-span-12 md:col-span-8 flex flex-col h-[calc(100vh-6.3rem)] md:h-[calc(100vh-6.4rem)] shadow-md">
-            <WrappedComponent user={user} chatId={chatId} {...props} />
+            <WrappedComponent user={user} chatId={chatId} groupId={groupId} {...props} />
           </div>
         </div>
-        <Button onClick={()=>dispatch(setIsSideBarOpen(true))} className="bg-secondary hover:bg-card ml-2 h-10 w-10 sticky bottom-2 left-0 rounded-full p-1">
+        <Button onClick={()=>dispatch(setIsSideBarOpen(true))} className="inset-x-1 z-30 bg-transparent backdrop-blur-2xl hover:bg-card ml-2 h-10 w-10 sticky bottom-2 left-0 rounded-full p-1">
           <Settings size={20} className="text-primary" />
         </Button>
         <Sidebar user={user}/>

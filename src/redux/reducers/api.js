@@ -6,11 +6,18 @@ import {server} from "../../constant/config.js"
 const api = createApi({
     reducerPath:"api",
     baseQuery:fetchBaseQuery({baseUrl:`${server}/api/v1/`}),
-    tagTypes:["Chats","user", "message"],
+    tagTypes:["Chats","user", "message","groups"],
 
     endpoints:(builder) =>({
         myChats:builder.query({
             query:()=>({url:"chat/my" , 
+                credentials:"include"
+            }),
+            provideTags:["Chats"],
+            keepUnusedDataFor:0
+        }),
+        myGroups:builder.query({
+            query:()=>({url:"group/my" , 
                 credentials:"include"
             }),
             provideTags:["Chats"],
@@ -33,9 +40,26 @@ const api = createApi({
             keepUnusedDataFor: 0,
             providesTags:["Chats"],
         }),
+        groupDetails:builder.query({
+            query:({id})=>{
+                let url = `group/${id}`
+                return{url,
+                credentials:"include"}
+            },
+            keepUnusedDataFor: 0,
+            providesTags:["groups"],
+        }),
         getMessages:builder.query({
             query:({id,page})=>({
                 url:`chat/message/${id}?page=${page}`,
+                credentials:"include",
+            }),
+            keepUnusedDataFor: 0,
+            providesTags:["message"],
+        }),
+        getGroupMessages:builder.query({
+            query:({id,page})=>({
+                url:`group/messages/${id}?page=${page}`,
                 credentials:"include",
             }),
             keepUnusedDataFor: 0,
@@ -69,11 +93,11 @@ const api = createApi({
         }),
         leaveGroup:builder.mutation({
             query:({id})=>({
-                url:`chat/leave/${id}`,
+                url:`group/${id}`,
                 method:"DELETE",
                 credentials:"include",
             }),
-            invalidatesTags:["Chats"]
+            invalidatesTags:["groups"]
         }),
         // renameUser:builder.mutation({
         //     query:({newName})=>({
@@ -88,8 +112,13 @@ const api = createApi({
     })
 })
 export default api
-export const  {useCreateChatMutation
+export const  {
+    useGetGroupMessagesQuery,
+    useLeaveGroupMutation,
+    useGroupDetailsQuery,
+    useCreateChatMutation
     ,useChatDetailsQuery,
+    useMyGroupsQuery,
     useGetMessagesQuery,
     useMyChatsQuery,
     useDeleteChatMutation,

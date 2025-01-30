@@ -2,7 +2,8 @@ import React, { Fragment, lazy, useCallback, useEffect, useRef, useState } from 
 import appLayout from "../Layout/appLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import {
-  useChatDetailsQuery,
+  useGroupDetailsQuery,
+  useGetGroupMessagesQuery,
   useGetMessagesQuery,
 } from "../../redux/reducers/api";
 import MessageComponent from "../shared/messageComponent";
@@ -13,7 +14,7 @@ import {
   IS_TYPING,
   STOP_TYPING,
   REFETECH_CHATS,
-  MARK_MESSAGES_READ,
+  NEW_GROUP_MESSAGE,
 } from "../../constant/event";
 import { useSocketEvents } from "../../hooks/hook";
 import { getSocket } from "../../socket";
@@ -28,21 +29,19 @@ import { Loader2, Paperclip, SendIcon } from "lucide-react";
 import { DotPattern } from "../ui/dot-pattern";
 import { cn } from "@/lib/utils";
 import FileMenu from "../specific/FileMenu";
-import { removeUnreadChat } from "@/redux/reducers/chat";
-// import ChatDetailsSidebar from "../specific/ProfileSideBar";
-// const FileMenu = lazy(() => import("../specific/FileMenu"));
 const ChatDetailsSidebar = lazy(() => import("../specific/ProfileSideBar"));
-const Chat = ({ chatId, user }) => {
+
+const GroupPage = ({ groupId, user }) => {
   const { socket } = getSocket();
   const dispatch = useDispatch();
   const nav = useNavigate("/");
-
-  const [page, setpage] = useState(1);
+  console.log(groupId);
+  const [page, setPage] = useState(1);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
-  const [MeTyping, setMeTyping] = useState(false);
+  const [meTyping, setMeTyping] = useState(false);
   const [draggedOver, setDraggedOver] = useState(false);
-  const typingtimeOut = useRef(null);
+  const typingTimeout = useRef(null);
   const containerRef = useRef(null);
   const fileMenuRef = useRef(null);
   const bottomRef = useRef(null);
@@ -53,23 +52,23 @@ const Chat = ({ chatId, user }) => {
     (state) => state.misc
   );
   const {
-    data: chatDetails,
-    refetch: refetchChatDetails,
-    isError: chatDetailsIsError,
-    isLoading: chatDetailsLoading,
-  } = useChatDetailsQuery({ id: chatId });
-  const members = chatDetails?.members.map((member) => member?.userId);
+    data: groupDetails,
+    refetch: refetchGroupDetails,
+    isError: groupDetailsIsError,
+    isLoading: groupDetailsLoading,
+  } = useGroupDetailsQuery({ id: groupId });
+  const members = groupDetails?.groupMembers?.map((member) => member?.userId);
 
   useEffect(() => {
-    if (!chatDetails && !isLoading) {
-      console.log(chatDetails, isLoading);
+    if (!groupDetails && !groupDetailsLoading) {
+      console.log(groupDetails, groupDetailsLoading);
       nav("/");
     }
-    if (chatDetailsIsError && !isLoading) {
-      console.log(chatDetails);
+    if (groupDetailsIsError && !groupDetailsLoading) {
+      // console.log(groupDetails);
       nav("/");
     }
-  }, [chatDetails]);
+  }, [groupDetails]);
 
   const {
     data,
@@ -77,58 +76,56 @@ const Chat = ({ chatId, user }) => {
     isSuccess: messageSuccess,
     isError,
     error,
-    refetch:refetchMessages
-  } = useGetMessagesQuery({
+    refetch: refetchMessages,
+  } = useGetGroupMessagesQuery({
     page,
-    id: chatId,
+    id: groupId,
   });
-  
+
   const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
     containerRef,
     data?.totalMessages,
     page,
-    setpage,
+    setPage,
     data?.messages
   );
-  // console.log("chatDetails",chatDetails)
-  // console.log("Messsges",data?.messages)
-
-  const errorhandler = () => {
-    //error handling page logic
+  const errorHandler = () => {
+    // error handling page logic
   };
 
-  //DropZoneHandlers
+  // DropZoneHandlers
 
-  //!all handlers
+  //! all handlers
   const handleFileUpload = (files) => {
     const file = files[0];
     // Implement your file upload logic here
     console.log(file);
   };
 
-
-  const SubmitHandler = (e) => {
+  const submitHandler = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
-    //to emit message to server
+    // to emit message to server
 
-    socket.emit(NEW_MESSAGE, { chatId, members, message });
+    socket.emit(NEW_GROUP_MESSAGE, { groupId, members, message });
     setMessage("");
   };
-  const MessageOnChange = (e) => {
+
+  const messageOnChange = (e) => {
     e.preventDefault();
     setMessage(e.target.value);
 
-    if (!MeTyping) {
-      socket.emit(IS_TYPING, { members, chatId, userId: user?.id });
+    if (!meTyping) {
+      socket.emit("", { members, groupId, userId: user?.id });
       setMeTyping(true);
     }
-    if (typingtimeOut) clearTimeout(typingtimeOut.current);
-    typingtimeOut.current = setTimeout(() => {
-      socket.emit(STOP_TYPING, { members, chatId });
+    if (typingTimeout) clearTimeout(typingTimeout.current);
+    typingTimeout.current = setTimeout(() => {
+      socket.emit("", { members, groupId });
       setMeTyping(false);
     }, 1500);
   };
+
   const openFileMenu = useCallback(
     (e) => {
       (fileMenuRef.pageX = e.pageX), (fileMenuRef.pageY = e.pageY);
@@ -137,96 +134,86 @@ const Chat = ({ chatId, user }) => {
     [dispatch]
   );
 
-  //!Event listner handlers
+  //! Event listener handlers
   const isTypingListener = useCallback(
     (data) => {
-      if (data.chatId !== chatId) return;
-      // setUsertyping(true)
-      console.log(data, "istyping");
-
+      if (data.groupId !== groupId) return;
+      console.log(data, "is typing");
       dispatch(setUserTyping(true));
     },
-    [chatId]
+    [groupId]
   );
 
   const stopTypingListener = useCallback(
     ({ data }) => {
-      if (data.chatId !== chatId) return;
-      // setUsertyping(false)
-      console.log(data, "stooped");
+      if (data.groupId !== groupId) return;
+      console.log(data, "stopped");
       dispatch(setUserTyping(false));
     },
-    [chatId]
+    [groupId]
   );
 
   const newMessagesListener = useCallback(
     (data) => {
-      if (data.chatId !== chatId) return;
+      if (data.groupId !== groupId) return;
       // Safely update messages state
       setMessages((prevMessages) => [...prevMessages, data?.message || data]);
     },
-    [chatId]
+    [groupId]
   );
 
-  const AlertListener = useCallback(
+  const alertListener = useCallback(
     (content) => {
-      if (data.chatId !== chatId) return;
+      if (data.groupId !== groupId) return;
       const messageForAlert = {
         content,
         sender: {
           _id: "csefwfkjfnksfnkwfks",
           name: "Admin",
         },
-        chat: chatId,
+        groupId,
         createdAt: new Date().toISOString(),
       };
     },
-    [chatId]
+    [groupId]
   );
 
-  const refetchChatDetailsListener = useCallback(() => {
-    console.log("heree");
-    refetchChatDetails();
-    if (!chatDetails) nav("/");
-    console.log(chatDetails);
-  }, [chatId, refetchChatDetails]);
+  const refetchGroupDetailsListener = useCallback(() => {
+    console.log("here");
+    refetchGroupDetails();
+    if (!groupDetails) nav("/");
+  }, [groupId, refetchGroupDetails]);
 
   const eventHandlers = {
-    [REFETECH_CHATS]: refetchChatDetailsListener,
-    [NEW_MESSAGE]: newMessagesListener,
+    [REFETECH_CHATS]: refetchGroupDetailsListener,
+    [NEW_GROUP_MESSAGE]: newMessagesListener,
     [IS_TYPING]: isTypingListener,
     [STOP_TYPING]: stopTypingListener,
   };
   useSocketEvents(socket, eventHandlers);
 
   useEffect(() => {
-    if (bottomRef.current){
-      console.log("scrolled")
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });}
+    if (bottomRef.current)
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
 
   useEffect(() => {
     // Reset all message-related states explicitly
-    setpage(1);  // Reset to first page
+    setPage(1); // Reset to first page
     setMessages([]); // Clear current messages
     setOldMessages([]); // Clear old messages
-  
+
     // Trigger fresh data fetching
     refetchMessages();
-    refetchChatDetails();
-  }, [chatId]);
-  useEffect(()=>{
-    socket.emit(MARK_MESSAGES_READ,{chatId,userId:user?.id},(response)=>{
-      if(!!response.success) dispatch(removeUnreadChat(chatId))
-    })
-  },[messages])
+    refetchGroupDetails();
+  }, [groupId]);
+
   return (
     <>
       {isLoading ? (
-        <><div className="flex items-center justify-center w-full h-full">
+        <div className="flex items-center justify-center w-full h-full">
           <Loader2 className="animate-spin " />
-          </div></>
+        </div>
       ) : (
         <div
           onDragEnter={(e) => {
@@ -239,14 +226,14 @@ const Chat = ({ chatId, user }) => {
           }}
           onDragOver={(e) => {
             e.preventDefault(); // Necessary to allow dropping
-           }}
+          }}
           onDragLeave={(e) => {
             e.preventDefault();
             dragCounter.current -= 1; // Increment counter
             if (dragCounter.current === 0) {
               setDraggedOver(false);
             }
-           }}
+          }}
           onDrop={(e) => {
             e.preventDefault();
             setDraggedOver(false);
@@ -257,25 +244,20 @@ const Chat = ({ chatId, user }) => {
               handleFileUpload(files);
             }
           }}
-          className=" relative h-full w-full flex-col flex-1 "
+          className="relative h-full w-full flex-col flex-1"
         >
-          {!chatDetailsLoading && (
-            <ChatHeader user={chatDetails.user} />
-          )}
+          {!groupDetailsLoading && <ChatHeader group={groupDetails?.groupDetails} />}
           <DotPattern
             className={cn(
               "absolute",
               "[mask-image:radial-gradient(250px_circle_at_center,gray,transparent)]" // Increased dot pattern size
             )}
           />
-          <div
-            className={`flex flex-col justify-between border-box  flex-1 h-[calc(100%-3.7rem)]`}
-          >
+          <div className="flex flex-col justify-between border-box flex-1 h-[calc(100%-3.7rem)]">
             {/* chat area */}
-
             <div
               ref={containerRef}
-              className={`px-2 overflow-y-scroll flex flex-col scrollbar-none  pl-1 pr-2 md:pr-8 ${
+              className={`px-2 overflow-y-scroll flex flex-col scrollbar-none pl-1 pr-2 md:pr-8 ${
                 draggedOver ? "border-primary border-dashed border-2" : ""
               }`}
             >
@@ -287,36 +269,28 @@ const Chat = ({ chatId, user }) => {
               {messageSuccess &&
                 oldMessages?.map((message, index) => {
                   return (
-                    <MessageComponent
-                      key={index}
-                      user={user}
-                      message={message}
-                    />
+                    <MessageComponent key={index} user={user} message={message} />
                   );
                 })}
               {messageSuccess &&
                 messages?.map((message, index) => {
                   return (
-                    <MessageComponent
-                      key={index}
-                      user={user}
-                      message={message}
-                    ></MessageComponent>
+                    <MessageComponent key={index} user={user} message={message} />
                   );
                 })}
-              <div ref={bottomRef} className="h-[0px] hidden w-0 z-50">hello</div>
+              <div ref={bottomRef} className="h-[0px] hidden w-0 z-50"></div>
               {isFileMenu && (
-                <FileMenu chatId={chatId} fileMenuRef={fileMenuRef} />
+                <FileMenu groupId={groupId} fileMenuRef={fileMenuRef} />
               )}
             </div>
 
             {/* send message area */}
-            <div className=" w-full bg-card border border-separate">
+            <div className="w-full bg-card border border-separate">
               <form
-                onSubmit={SubmitHandler}
+                onSubmit={submitHandler}
                 className="flex flex-col justify-center h-full w-full"
               >
-                <div className="flex gap-1 py-5 px-6 relative items-center justify-around w-full ">
+                <div className="flex gap-1 py-5 px-6 relative items-center justify-around w-full">
                   <div
                     className="p-1 flex gap-1 w-full items-center relative"
                     ref={fileMenuRef}
@@ -324,8 +298,8 @@ const Chat = ({ chatId, user }) => {
                     <input
                       type="text"
                       placeholder="send..."
-                      className="border-primary-foreground text-slate-700 bg-gray-200 rounded-xl  h-10 w-[90%]"
-                      onChange={MessageOnChange}
+                      className="border-primary-foreground text-slate-700 bg-gray-200 rounded-xl h-10 w-[90%]"
+                      onChange={messageOnChange}
                       value={message}
                     />
                     <div
@@ -339,7 +313,7 @@ const Chat = ({ chatId, user }) => {
                       />
                     </div>
                     <div
-                      onClick={SubmitHandler}
+                      onClick={submitHandler}
                       className="bg-primary-foreground rounded-2xl hover:bg-secondary"
                     >
                       <SendIcon className="text-primary" size={20} />
@@ -351,9 +325,10 @@ const Chat = ({ chatId, user }) => {
           </div>
         </div>
       )}
-      {!chatDetailsIsError && !chatDetailsLoading && (
+      {!groupDetailsIsError && !groupDetailsLoading && (
         <ChatDetailsSidebar
-          chat={chatDetails}
+          group={groupDetails}
+          isGroup={true}
           isOpen={isChatDetailsBarOpen}
           onClose={() => dispatch(setIsChatDetailsBarOpen())}
         />
@@ -362,4 +337,4 @@ const Chat = ({ chatId, user }) => {
   );
 };
 
-export default appLayout()(Chat);
+export default appLayout()(GroupPage);

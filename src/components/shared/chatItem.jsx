@@ -19,21 +19,20 @@ const ChatItem = ({
   sameSender,
   isOnline,
   newMessageAlert,
+  unreadCount,
   index = 0,
   handleDeleteChat,
 }) => {
   const dispatch = useDispatch();
   const { pinnedChats, muteChats } = useSelector((state) => state.chat);
-
   const chatRef = useRef(null);
   const lastSeenTime = timeAgo(lastSeen);
   if (!avatar) avatar = userAvatar;
-
   return (
     <Link
       ref={chatRef}
       to={`/chat/${_id}`}
-      onClick={() => dispatch(setIsChatList())}
+      // onClick={() => dispatch(setIsChatList())}
       onContextMenu={(e) => handleDeleteChat(e, _id, groupChat)}
       className={`border-b border-b-accent ${
         selected ? "bg-card  border border-l-4 border-l-primary " : ""
@@ -58,7 +57,9 @@ const ChatItem = ({
             >
               <Avatar className="h-12 w-12">
                 <AvatarImage src={`${avatar?.url}`}></AvatarImage>
-                <AvatarFallback className="dark:bg-card-foreground">{name[0]}</AvatarFallback>
+                <AvatarFallback className="dark:bg-card-foreground">
+                  {name[0]}
+                </AvatarFallback>
               </Avatar>
             </div>
           </div>
@@ -67,8 +68,18 @@ const ChatItem = ({
               <span className="dark:text-white self-start text-xs font-bold  text-[#212121] overflow-hidden whitespace-nowrap text-ellipsis">
                 {name}{" "}
               </span>
-              <div className=" text-muted-foreground text-[9px]  text-[#B0B0B0] overflow-hidden whitespace-nowrap text-ellipsis">
-                {lastSeenTime}
+              <div className=" flex gap-4">
+                <div className=" text-muted-foreground text-[9px]  text-[#B0B0B0] overflow-hidden whitespace-nowrap text-ellipsis">{lastSeenTime}</div>
+                {
+                  muteChats?.includes(_id)&&(
+                    <div>
+                      <VolumeOffIcon
+                        size={15}
+                        className="text-muted-foreground fill-muted-foreground"
+                      />
+                    </div>
+                  )
+                }
               </div>
             </div>
             <div className=" text-sm h-11  text-gray-400 text-ellipsis overflow-y-hidden overflow-x-hidden  ">
@@ -77,21 +88,23 @@ const ChatItem = ({
           </div>
         </div>
         <div className="flex-col  justify-between space-y-3">
-          {pinnedChats?.includes(_id) && (
-            <div className="">
-              <Bookmark
-                size={16}
-                className="text-muted-foreground fill-muted-foreground"
-              />
+          {
+            pinnedChats?.includes(_id)&& (
+              <div className="">
+                <Bookmark
+                  size={16}
+                  className="text-muted-foreground fill-muted-foreground"
+                />
+              </div>
+            )
+          }
+          {!!unreadCount && (
+            <div className="text-primary bg-muted text-xs h-5 w-5 rounded-full p-1 flex justify-center items-center">
+              {" "}
+              {unreadCount}
             </div>
           )}
-          {muteChats?.includes(_id) && (
-            <div>
-              <VolumeOffIcon size={20} className="text-muted-foreground fill-muted-foreground"/>
-              </div>
-          )}
         </div>
-       
       </motion.div>
     </Link>
   );

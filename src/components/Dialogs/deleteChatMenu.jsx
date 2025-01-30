@@ -39,23 +39,23 @@ const DeleteChatMenu = ({anchor , socket}) => {
   }
   const pinChatHandler =()=>{
     dispatch(setIsDeleteMenu(false));
-    socket.emit("pinChat",{pinned:true,userId:user.id,chatId:chatIdContextMenu})     
+    socket.emit("pinChat",{pinned:true,isGroup:false,userId:user.id,chatId:chatIdContextMenu})     
     dispatch(setPinnedChats(chatIdContextMenu))
 }
 const unPinChatHandler =()=>{
     dispatch(setIsDeleteMenu(false))
-    socket.emit("pinChat",{pinned:false,userId:user.id,chatId:chatIdContextMenu})     
+    socket.emit("pinChat",{pinned:false,isGroup:false, userId:user.id,chatId:chatIdContextMenu})     
     dispatch(deleteFromPinnedChats(chatIdContextMenu))
 }
 
   const muteChatHandler = ()=>{
     dispatch(setIsDeleteMenu(false));
-    //socketLogic
+    socket.emit("MUTECHAT",{mute:true ,isGroup:false,userId:user.id,chatId:chatIdContextMenu}) 
     dispatch(setMuteChats(chatIdContextMenu))
   }
   const unMuteChatHandler = ()=>{
     dispatch(setIsDeleteMenu(false));
-    //socketLogic
+    socket.emit("MUTECHAT",{mute:false,isGroup:false, userId:user.id,chatId:chatIdContextMenu}) 
     dispatch(deleteFromMuteChats(chatIdContextMenu))
   }
 

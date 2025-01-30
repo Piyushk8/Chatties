@@ -4,12 +4,14 @@ const initialState = {
   isSearchOpen: false,
   isFileMenu: false,
   isDeleteMenu: false,
+  isGroupMenuOpen: false,
   uploadingLoader: false,
   selectedDeleteChat: {
     chatId: "",
     groupChat: false,
   },
   chatIdContextMenu:null,
+  groupIdContextMenu:null,
   userTyping:false,
   ProfileMenu:false,
   isChatDetailsBarOpen:false
@@ -24,6 +26,9 @@ const miscSlice = createSlice({
   reducers: {
     setIsSearch: (state,action) => {
       state.isSearchOpen = action.payload
+    },
+    setIsGroupMenuOpen: (state,action) => {
+      state.isGroupMenuOpen = action.payload
     },
     setIsCreateGroup: (state,action) => {
       state.isCreateGroup = action.payload
@@ -51,6 +56,11 @@ const miscSlice = createSlice({
     },removeChatIdContextMenu:(state)=>{
         state.chatIdContextMenu=null
     },
+    setGroupIdContextMenu:(state,action)=>{
+      state.groupIdContextMenu= action.payload;
+    },removeGroupIdContextMenu:(state)=>{
+        state.groupIdContextMenu=null
+    },
     setUserTyping:(state,action)=>{
         state.userTyping=action.payload
     },
@@ -69,6 +79,9 @@ const miscSlice = createSlice({
 
 export default miscSlice;
 export const {setProfileMenu,
+  setGroupIdContextMenu,
+  setIsGroupMenuOpen,
+  removeGroupIdContextMenu,
   setIsCreateGroup,
   setIsSideBarOpen,
   closeChatList,

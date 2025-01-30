@@ -10,8 +10,9 @@ import ProtectRoute from './components/auth/ProtectRoute'
 import MainLoader from './components/Layout/MainLoader'
 
 import { Login } from './components/pages/Login'
-import { setPinnedChatsArray } from './redux/reducers/chat'
+import { setMuteChatsArray, setPinnedChatsArray } from './redux/reducers/chat'
 import { ThemeProvider } from './components/theme-provider'
+import Group from './components/pages/Group'
 //const {Login} = lazy(()=>import('./components/pages/Login'))
 const Chat = lazy(()=>import('./components/pages/Chat'))
 const Home = lazy(()=>import('./components/pages/Home'))
@@ -26,7 +27,8 @@ const App = () => {
     }).then((res)=>{
       dispatch(setIsAuthenticated(true))
       dispatch(setPinnedChatsArray(res?.data?.pinnedChats))
-      console.log(res.data.user)
+      dispatch(setMuteChatsArray(res?.data?.mutedChatIds))
+      console.log(res.data)
       return dispatch(userExists(res?.data?.user))
     }).catch((err)=>{
       dispatch(setIsAuthenticated(false))
@@ -49,6 +51,7 @@ const App = () => {
             >
             <Route path="/" element={<Home/>} />
             <Route path="/chat/:chatId" element={<Chat/>} />
+            <Route path="/group/:groupId" element={<Group/>} />
             {/* <Route path="/:asd" element={<NotFound/>} /> */}
 
             
