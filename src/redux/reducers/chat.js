@@ -1,15 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  //notificationCount: 0,
-  unreadChats:[{
-    chatId:"",count:0
-  }],
-  pinnedChats:[],
-  muteChats:[]
-  ,chatSelection:"all"
- 
-  
+  unreadChats: [], // Stores both chat and group unread counts
+  pinnedChats: [],
+  muteChats: [],
+  chatSelection: "all",
 };
 
 const chatSlice = createSlice({
@@ -17,19 +12,32 @@ const chatSlice = createSlice({
   initialState,
   reducers: {
     setUnreadChats: (state, action) => {
-      state.unreadChats = action.payload?.filter(chatMember => chatMember.unreadCount > 0)
-        ?.map(chatMember => ({
-          chatId: chatMember.chat.id,
-          count: chatMember.unreadCount
-        }));
+      state.unreadChats = action.payload?.flatMap((item) => {
+        if (item.chat && item?.unreadCount>0) {
+          return {
+            id: item.chat.id,
+            type: "chat",
+            count: item.unreadCount,
+          };
+        } else if (item.group && item?.unreadCount>0)  {
+          return {
+            id: item.group.id,
+            type: "group",
+            count: item.group.unreadCount,
+          };
+        }
+        return [];
+      });
     },
-    updateUnreadCount:(state,{payload})=>{
-      const updatedchats = state?.unreadChats.filter((c)=>c.chatId!==payload?.chatId)
-      state.unreadChats=[{chatId:payload?.chatId,count:payload?.unreadCount},...updatedchats]
+    updateUnreadCount: (state, { payload }) => {
+      const updatedChats = state.unreadChats.filter((c) => c.id !== payload.id);
+      state.unreadChats = [
+        { id: payload.id, type: payload.type, count: payload.unreadCount },
+        ...updatedChats,
+      ];
     },
-    removeUnreadChat:(state,{payload})=>{
-      const updatedchats = state?.unreadChats.filter((c)=>c.chatId!==payload)
-      state.unreadChats=[{chatId:payload,count:0},...updatedchats]
+    removeUnreadChat: (state, { payload }) => {
+      state.unreadChats = state.unreadChats.filter((c) => c.id !== payload);
     },
     setPinnedChatsArray:(state,action)=>{
       state.pinnedChats = action.payload

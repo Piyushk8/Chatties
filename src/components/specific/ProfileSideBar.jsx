@@ -18,7 +18,6 @@ const ChatDetailsSidebar = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState("info");
-  console.log(groupDetails);
   const name = chat?.members[0]?.user?.name || groupDetails?.groupname;
   const avatarImage =
     chat?.members[0]?.user?.avatar?.url || groupDetails?.groupImage || "";

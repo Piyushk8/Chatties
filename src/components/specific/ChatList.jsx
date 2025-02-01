@@ -19,12 +19,13 @@ const ChatList = ({
   const { chatSelection, pinnedChats, unreadChats } = useSelector(
     (state) => state.chat
   );
-
-  //states
-
   useEffect(() => {
-    dispatch(setUnreadChats(chatData?.transformedChat));
-  }, [chatData]);
+    const transformedChats = Array.isArray(chatData?.transformedChat) ? chatData.transformedChat : [];
+    const transformedGroups = Array.isArray(myGroups) ? myGroups : [];
+    
+    dispatch(setUnreadChats([...transformedChats, ...transformedGroups]));
+  }, [chatData, myGroups]);
+  
   // sort chat logic
   useEffect(() => {
     if (chatSelection === "all" && chatData?.transformedChat) {
@@ -94,7 +95,6 @@ const ChatList = ({
       myGroups?.filter((g) => pinnedChats?.includes(g?.group?.id)) || [];
     const nonPinnedGroupsArray =
       myGroups?.filter((g) => !pinnedChats?.includes(g?.group?.id)) || [];
-    console.log(pinnedGroupsArray, nonPinnedGroupsArray);
     setChats([...pinnedGroupsArray, ...nonPinnedGroupsArray]);
   };
 
@@ -102,8 +102,8 @@ const ChatList = ({
     return unreadChats?.some((c) => c.chatId === id);
   };
 
-  const getUnreadChatCount = (chatId) => {
-    const chat = unreadChats.find((c) => c.chatId === chatId);
+  const getUnreadChatCount = (id) => {
+    const chat = unreadChats?.find((c) => c?.id === id );
     return chat?.count === 0 ? "" : chat?.count;
   };
   //button hanlders
@@ -144,6 +144,7 @@ const ChatList = ({
           </div>
         ) : (
           chats.map(({ chat, user, group }, index) => {
+            console.log(group)
             return chat ? (
               <ChatItem
                 key={index}
@@ -159,6 +160,7 @@ const ChatList = ({
               />
             ) : (
               <GroupItem
+              unreadCount={getUnreadChatCount(group?.id)}
                 key={index}
                 groupName={group?.groupname}
                 id={group?.id}

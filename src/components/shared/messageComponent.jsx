@@ -20,6 +20,7 @@ const MessageComponent = ({ user, message ,group}) => {
       <div
         className={`p-3 rounded-lg     my-0.5 md:mt-2  flex flex-col  min-h-11 h-fit ${
           sameSender ? `text-primary-foreground bg-primary` : `bg-secondary text-secondary-foreground`
+          ,!content && 'bg-slate-200'
         }`}
       >
         {content ? <div>{content}</div> : ""}

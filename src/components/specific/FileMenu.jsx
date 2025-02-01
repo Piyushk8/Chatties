@@ -11,7 +11,7 @@ import {
   VideoIcon,
 } from "lucide-react";
 
-const FileMenu = memo(({ fileMenuRef, chatId }) => {
+const FileMenu = memo(({ fileMenuRef, chatId ,groupId}) => {
   const { isFileMenu } = useSelector((state) => state.misc);
 
   const dispatch = useDispatch();
@@ -54,11 +54,11 @@ const FileMenu = memo(({ fileMenuRef, chatId }) => {
     try {
       const myForm = new FormData();
 
-      myForm.append("chatId", chatId);
+      myForm.append(chatId ? "chatId":"groupId", groupId || chatId);
       files.forEach((file) => myForm.append("files", file));
 
-      const res = await sendAttachments(myForm);
-
+      const res = await sendAttachments({data:myForm,IsGroup:true});
+      console.log(res.error)
       if (res.data) toast.success(`${key} sent successfully`, { id: toastId });
       else toast.error(`Failed to send ${key}`, { id: toastId });
 

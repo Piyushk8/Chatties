@@ -11,6 +11,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 const GroupItem = (
     { groupImage,
       groupName,
+      unreadCount,
         selected,
         lastMessage,
         id,
@@ -94,12 +95,12 @@ const GroupItem = (
                       </div>
                     )
                   }
-                  {/* {!!unreadCount && (
+                  {!!unreadCount && (
                     <div className="text-primary bg-muted text-xs h-5 w-5 rounded-full p-1 flex justify-center items-center">
                       {" "}
                       {unreadCount}
                     </div>
-                  )} */}
+                  )}
                 </div>
       </motion.div>
     </Link>

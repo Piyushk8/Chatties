@@ -7,6 +7,7 @@ import { motion } from "framer-motion"
 import {
   InitialUsersStatus,
   MARK_MESSAGES_READ,
+  NEW_GROUP_MESSAGE_ALERT,
   NEW_MESSAGE,
   NEW_MESSAGE_ALERT,
   ONLINE_USER,
@@ -55,7 +56,6 @@ const appLayout = () => (WrappedComponent) => {
       ({ onlineUsersIds: users }) => {
         setOnlineUsers(users);
         refetch();
-        console.log(onlineUsers);
       },
       [refetch]
     );
@@ -78,6 +78,15 @@ const appLayout = () => (WrappedComponent) => {
       (data) => {
         // console.log("new messag alert ")
         // console.log(data)
+        dispatch(updateUnreadCount(data))
+        refetch();
+      },
+      [refetch]
+    );
+    const newGroupMessageHandler = useCallback(
+      (data) => {
+        console.log("new grp messag alert ")
+        console.log(data)
         dispatch(updateUnreadCount(data))
         refetch();
       },
@@ -110,6 +119,7 @@ const appLayout = () => (WrappedComponent) => {
 
     const eventHandlers = {
       [NEW_MESSAGE_ALERT]: newMessageAlertHandler,
+      [NEW_GROUP_MESSAGE_ALERT]: newGroupMessageHandler,
       // [MARK_MESSAGES_READ]:markasread,
       [REFETECH_CHATS]: refetchChatHandler,
       [InitialUsersStatus]: OnlineListener,
@@ -126,7 +136,6 @@ const appLayout = () => (WrappedComponent) => {
       if(groupChat) {
         dispatch(setGroupIdContextMenu(_id));
         return dispatch(setIsGroupMenuOpen(true));
-        
       }
       dispatch(setChatIdContextMenu(_id));
       dispatch(setIsDeleteMenu(true));

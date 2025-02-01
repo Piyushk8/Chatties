@@ -62,11 +62,9 @@ const Chat = ({ chatId, user }) => {
 
   useEffect(() => {
     if (!chatDetails && !isLoading) {
-      console.log(chatDetails, isLoading);
       nav("/");
     }
     if (chatDetailsIsError && !isLoading) {
-      console.log(chatDetails);
       nav("/");
     }
   }, [chatDetails]);
@@ -139,11 +137,8 @@ const Chat = ({ chatId, user }) => {
 
   //!Event listner handlers
   const isTypingListener = useCallback(
-    (data) => {
+    ({data}) => {
       if (data.chatId !== chatId) return;
-      // setUsertyping(true)
-      console.log(data, "istyping");
-
       dispatch(setUserTyping(true));
     },
     [chatId]
@@ -152,8 +147,6 @@ const Chat = ({ chatId, user }) => {
   const stopTypingListener = useCallback(
     ({ data }) => {
       if (data.chatId !== chatId) return;
-      // setUsertyping(false)
-      console.log(data, "stooped");
       dispatch(setUserTyping(false));
     },
     [chatId]
@@ -188,7 +181,6 @@ const Chat = ({ chatId, user }) => {
     console.log("heree");
     refetchChatDetails();
     if (!chatDetails) nav("/");
-    console.log(chatDetails);
   }, [chatId, refetchChatDetails]);
 
   const eventHandlers = {
@@ -201,10 +193,8 @@ const Chat = ({ chatId, user }) => {
 
   useEffect(() => {
     if (bottomRef.current){
-      console.log("scrolled")
       bottomRef.current.scrollIntoView({ behavior: "smooth" });}
   }, [messages]);
-
 
   useEffect(() => {
     // Reset all message-related states explicitly
@@ -260,7 +250,7 @@ const Chat = ({ chatId, user }) => {
           className=" relative h-full w-full flex-col flex-1 "
         >
           {!chatDetailsLoading && (
-            <ChatHeader user={chatDetails.user} />
+            <ChatHeader user={chatDetails?.members[0]?.user } />
           )}
           <DotPattern
             className={cn(

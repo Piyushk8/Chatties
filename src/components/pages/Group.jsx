@@ -1,4 +1,11 @@
-import React, { Fragment, lazy, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import appLayout from "../Layout/appLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -15,6 +22,7 @@ import {
   STOP_TYPING,
   REFETECH_CHATS,
   NEW_GROUP_MESSAGE,
+  MARK_GROUP_MESSAGES_READ,
 } from "../../constant/event";
 import { useSocketEvents } from "../../hooks/hook";
 import { getSocket } from "../../socket";
@@ -98,7 +106,7 @@ const GroupPage = ({ groupId, user }) => {
   //! all handlers
   const handleFileUpload = (files) => {
     const file = files[0];
-    // Implement your file upload logic here
+    // Implement file upload logic here
     console.log(file);
   };
 
@@ -208,6 +216,17 @@ const GroupPage = ({ groupId, user }) => {
     refetchGroupDetails();
   }, [groupId]);
 
+
+  useEffect(() => {
+    socket.emit(
+      MARK_GROUP_MESSAGES_READ,
+      { groupId, userId: user?.id },
+      (response) => {
+        if (!!response.success) dispatch(removeUnreadChat(groupId));
+      }
+    );
+  }, [messages]);
+
   return (
     <>
       {isLoading ? (
@@ -246,7 +265,9 @@ const GroupPage = ({ groupId, user }) => {
           }}
           className="relative h-full w-full flex-col flex-1"
         >
-          {!groupDetailsLoading && <ChatHeader group={groupDetails?.groupDetails} />}
+          {!groupDetailsLoading && (
+            <ChatHeader group={groupDetails?.groupDetails} />
+          )}
           <DotPattern
             className={cn(
               "absolute",
@@ -269,13 +290,21 @@ const GroupPage = ({ groupId, user }) => {
               {messageSuccess &&
                 oldMessages?.map((message, index) => {
                   return (
-                    <MessageComponent key={index} user={user} message={message} />
+                    <MessageComponent
+                      key={index}
+                      user={user}
+                      message={message}
+                    />
                   );
                 })}
               {messageSuccess &&
                 messages?.map((message, index) => {
                   return (
-                    <MessageComponent key={index} user={user} message={message} />
+                    <MessageComponent
+                      key={index}
+                      user={user}
+                      message={message}
+                    />
                   );
                 })}
               <div ref={bottomRef} className="h-[0px] hidden w-0 z-50"></div>
