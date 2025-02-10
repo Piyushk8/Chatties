@@ -52,15 +52,19 @@ const FileMenu = memo(({ fileMenuRef, chatId ,groupId}) => {
     closeFileMenu();
 
     try {
+      const IsGroup = groupId ? true : false
       const myForm = new FormData();
 
       myForm.append(chatId ? "chatId":"groupId", groupId || chatId);
       files.forEach((file) => myForm.append("files", file));
 
-      const res = await sendAttachments({data:myForm,IsGroup:true});
+      const res = await sendAttachments({data:myForm,IsGroup:IsGroup});
       console.log(res.error)
       if (res.data) toast.success(`${key} sent successfully`, { id: toastId });
-      else toast.error(`Failed to send ${key}`, { id: toastId });
+      else{
+        toast.error(`Failed to send ${key}`, { id: toastId });
+        console.log(res.error)
+      } 
 
       // Fetching Here
     } catch (error) {

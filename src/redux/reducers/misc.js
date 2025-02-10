@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   isSearchOpen: false,
+  IsMediaPreview: false,
   isFileMenu: false,
   isDeleteMenu: false,
   isGroupMenuOpen: false,
@@ -26,6 +27,9 @@ const miscSlice = createSlice({
   reducers: {
     setIsSearch: (state,action) => {
       state.isSearchOpen = action.payload
+    },
+    setIsMediaPreview: (state,action) => {
+      state.IsMediaPreview = action.payload
     },
     setIsGroupMenuOpen: (state,action) => {
       state.isGroupMenuOpen = action.payload
@@ -79,6 +83,7 @@ const miscSlice = createSlice({
 
 export default miscSlice;
 export const {setProfileMenu,
+  setIsMediaPreview,
   setGroupIdContextMenu,
   setIsGroupMenuOpen,
   removeGroupIdContextMenu,

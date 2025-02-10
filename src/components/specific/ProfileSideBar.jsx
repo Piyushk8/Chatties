@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { memo, useEffect, useState } from "react";
 import { Info, Bell, Lock, Star } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "../ui/input";
 import moment from "moment";
+import axios from "axios";
+import { server } from "@/constant/config";
+import { getFileType } from "@/lib/utils";
+import MediaPreview from "./MediaPreview";
+import { setIsMediaPreview } from "@/redux/reducers/misc";
+import { useDispatch, useSelector } from "react-redux";
 
 const ChatDetailsSidebar = ({
   chat,
@@ -18,11 +24,18 @@ const ChatDetailsSidebar = ({
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   const [activeTab, setActiveTab] = useState("info");
+  const [attachments, setAttachments] = useState([]); // Moved state to the top
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewType, setPreviewType] = useState(null);
+   const {IsMediaPreview} = useSelector((state)=>state.misc)
+  const dispatch = useDispatch()
+
+
   const name = chat?.members[0]?.user?.name || groupDetails?.groupname;
   const avatarImage =
     chat?.members[0]?.user?.avatar?.url || groupDetails?.groupImage || "";
 
-  // Handle search debouncing
+  // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedQuery(searchQuery);
@@ -31,8 +44,7 @@ const ChatDetailsSidebar = ({
     return () => clearTimeout(handler);
   }, [searchQuery]);
 
-  // // Update current members based on debounced query
-  // Update current members based on debounced query
+  // Update current members based on search query
   useEffect(() => {
     if (isGroup) {
       if (debouncedQuery.trim() === "") {
@@ -50,10 +62,38 @@ const ChatDetailsSidebar = ({
     }
   }, [debouncedQuery, groupMembers, isGroup]);
 
+  // Fetch attachments when media tab is opened
+  useEffect(() => {
+    if (activeTab === "media" && (chat?.members?.chatId || groupDetails?.id)) {
+      const fetchAttachments = async () => {
+        try {
+          const response = await axios.get(
+            `${server}/api/v1/${isGroup ? "group" : "chat"}/attachments/${
+              isGroup ? groupDetails?.id : chat?.members[0]?.chatId
+            }`,
+            { withCredentials: true }
+          );
+          setAttachments(response.data?.attachments);
+        } catch (error) {
+          console.error("Error fetching attachments:", error);
+        }
+      };
+      fetchAttachments();
+    }
+  }, [activeTab, chat?.members?.chatId]); // Runs when tab changes or chatId updates
+
   const renderInfoTab = () => (
     <div className="space-y-4 p-4 flex-1">
       <div className="flex flex-col items-center">
-        <Avatar className="w-24 bg-card h-24 rounded-full">
+        <Avatar
+          onClick={() =>{
+            if(!avatarImage) return
+            setPreviewType("image")
+            setPreviewUrl(avatarImage)
+            dispatch(setIsMediaPreview(true))}
+          }
+          className="w-24 bg-card h-24 rounded-full"
+        >
           <AvatarImage src={avatarImage} />
           <AvatarFallback className="text-white text-2xl">
             {name[0]}
@@ -83,7 +123,7 @@ const ChatDetailsSidebar = ({
                 ).fromNow() || "No description"}
               </p>
             </div>
-            <div className="flex items-center flex-1 space-x-3">
+            <div className="flex text-center items-center flex-1 space-x-3">
               Common Groups
             </div>
           </>
@@ -92,68 +132,72 @@ const ChatDetailsSidebar = ({
     </div>
   );
 
-  const renderMediaTab = () => (
-    <div className="p-4">
-      <div className="grid grid-cols-3 gap-2">Media goes here</div>
-    </div>
-  );
-
-  const renderSettingsTab = () => (
-    <div className="space-y-4 p-4">
-      <div className="flex items-center justify-between p-3 hover:bg-secondary rounded-lg">
-        <div className="flex items-center space-x-3">
-          <Bell className="text-muted-foreground" />
-          <span>Mute Notifications</span>
-        </div>
-        <input type="checkbox" className="toggle" />
-      </div>
-      <div className="flex items-center justify-between p-3 hover:bg-secondary rounded-lg">
-        <div className="flex items-center space-x-3">
-          <Lock className="text-muted-foreground" />
-          <span>Disappearing Messages</span>
-        </div>
-        <input type="checkbox" className="toggle" />
-      </div>
-      <div className="flex items-center justify-between p-3 hover:bg-secondary rounded-lg">
-        <div className="flex items-center space-x-3">
-          <Star className="text-muted-foreground" />
-          <span>Pin Chat</span>
-        </div>
-        <input type="checkbox" className="toggle" />
-      </div>
-    </div>
-  );
-
-  const memberListTab = () => (
-    <div className="flex-col h-full w-full overflow-hidden p-3 justify-center items-center">
-      <div className="text-center text-primary text-xl font-bold">Members</div>
-      <Input
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        className="bg-input mb-2"
-        placeholder="Search..."
-      />
-      <div className="bg-muted space-y-3 p-1 h-full overflow-y-auto w-full">
-        {currentMembers?.length === 0 ? (
-          "no members"
-        ) : (
-          <>
-            {currentMembers?.map(({ user }, index) => (
-              <div key={index} className="flex items-center gap-3">
-                <Avatar>
-                  <AvatarImage src={user?.avatar?.url} />
-                  <AvatarFallback className="bg-card">
-                    {user?.name?.[0]}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="w-1/2 truncate break-words">{user?.name}</div>
+  const renderMediaTab = () => {
+    return (
+      <div className="p-4">
+        {attachments.length > 0 ? (
+          <div className="grid grid-cols-3 gap-2">
+            {attachments.map(({ attachment }, index) => {
+              const fileType = getFileType(attachment[0]);
+              if (fileType === "image") {
+                return (
+                  <div
+                    key={index}
+                    className="rounded-lg h-28 w-28 overflow-hidden"
+                    onClick={() =>{
+                      setPreviewType("image")
+                      setPreviewUrl(attachment[0])
+                      dispatch(setIsMediaPreview(true))}
+                    }
+                  >
+                    <img
+                      src={attachment[0]}
+                      alt="Attachment"
+                      className="w-full h-auto rounded-lg"
+                    />
+                  </div>
+                );
+              }
+              if (fileType === "video") {
+                return (
+                  <div
+                    key={index}
+                    className="rounded-lg h-28 w-28 overflow-hidden"
+                    onClick={() =>{
+                      setPreviewType("video")
+                      setPreviewUrl(attachment[0])
+                      dispatch(setIsMediaPreview(true))}
+                    }
+                  >
+                    <video
+                      // height={100}
+                      // width={100}
+                      src={attachment[0]}
+                      alt="Attachment"
+                      autoPlay
+                      className="w-full h-full rounded-lg"
+                    />
+                  </div>
+                );
+              }
+            })}
+            {/* {attachments.map(({ attachment }, index) => {
+              const fileType = getFileType()
+              return(
+              <div key={index} className="rounded-lg h-28 w-28 overflow-hidden">
+                {
+                }
               </div>
-            ))}
-          </>
+            )})} */}
+          </div>
+        ) : (
+          <p className="text-center text-muted-foreground">
+            No media available
+          </p>
         )}
       </div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
@@ -209,13 +253,14 @@ const ChatDetailsSidebar = ({
           <div className="flex-grow overflow-y-auto">
             {activeTab === "info" && renderInfoTab()}
             {activeTab === "media" && renderMediaTab()}
-            {activeTab === "settings" && renderSettingsTab()}
-            {activeTab === "members" && memberListTab()}
           </div>
         </div>
+        {IsMediaPreview && (
+                      <MediaPreview url={previewUrl} mediaType={previewType} />
+                    )}
       </SheetContent>
     </Sheet>
   );
 };
 
-export default ChatDetailsSidebar;
+export default memo(ChatDetailsSidebar);

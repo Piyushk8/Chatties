@@ -4,8 +4,9 @@ import { useCreateChatMutation } from '../../redux/reducers/api';
 import Avatar from '../shared/Avatar';
 import toast from 'react-hot-toast';
 
-const InputFieldItem = ({ option, index }) => {
+const InputFieldItem = ({ option, index ,selected }) => {
     const [createChat, { isLoading, isError, isSuccess }] = useCreateChatMutation();
+    console.log(option)
     const [creating, setCreating] = useState(false);
     const nav = useNavigate()
     const handleCreateChat = async () => {
@@ -37,10 +38,10 @@ const InputFieldItem = ({ option, index }) => {
             >
                 <div className="flex border bg-card border-primary-foreground border-b-2 p-4 justify-start">
                     <div className='mr-6'>
-                        <Avatar avatar={option.avatar} />
+                        <Avatar avatar={option.avatar || option?.groupImage} />
                     </div>
                     <div className="sm:text-lg sm:text-card-foreground font-semibold overflow-x-auto text-ellipsis md:text-lg">
-                        {option.name}
+                        {option.name || option?.groupname}
                     </div>
                 </div>
                 {/* {isError && <p className="text-red-500">Failed to create chat.</p>}

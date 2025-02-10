@@ -1,4 +1,11 @@
-import React, { Fragment, lazy, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import appLayout from "../Layout/appLayout";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -29,6 +36,7 @@ import { DotPattern } from "../ui/dot-pattern";
 import { cn } from "@/lib/utils";
 import FileMenu from "../specific/FileMenu";
 import { removeUnreadChat } from "@/redux/reducers/chat";
+import ScrollBottomButton from "../shared/ScrollToBottom";
 // import ChatDetailsSidebar from "../specific/ProfileSideBar";
 // const FileMenu = lazy(() => import("../specific/FileMenu"));
 const ChatDetailsSidebar = lazy(() => import("../specific/ProfileSideBar"));
@@ -75,12 +83,12 @@ const Chat = ({ chatId, user }) => {
     isSuccess: messageSuccess,
     isError,
     error,
-    refetch:refetchMessages
+    refetch: refetchMessages,
   } = useGetMessagesQuery({
     page,
     id: chatId,
   });
-  
+
   const { data: oldMessages, setData: setOldMessages } = useInfiniteScrollTop(
     containerRef,
     data?.totalMessages,
@@ -103,7 +111,6 @@ const Chat = ({ chatId, user }) => {
     // Implement your file upload logic here
     console.log(file);
   };
-
 
   const SubmitHandler = (e) => {
     e.preventDefault();
@@ -137,7 +144,7 @@ const Chat = ({ chatId, user }) => {
 
   //!Event listner handlers
   const isTypingListener = useCallback(
-    ({data}) => {
+    ({ data }) => {
       if (data.chatId !== chatId) return;
       dispatch(setUserTyping(true));
     },
@@ -192,31 +199,38 @@ const Chat = ({ chatId, user }) => {
   useSocketEvents(socket, eventHandlers);
 
   useEffect(() => {
-    if (bottomRef.current){
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });}
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
   }, [messages]);
 
   useEffect(() => {
     // Reset all message-related states explicitly
-    setpage(1);  // Reset to first page
+    setpage(1); // Reset to first page
     setMessages([]); // Clear current messages
     setOldMessages([]); // Clear old messages
-  
+
     // Trigger fresh data fetching
     refetchMessages();
     refetchChatDetails();
   }, [chatId]);
-  useEffect(()=>{
-    socket.emit(MARK_MESSAGES_READ,{chatId,userId:user?.id},(response)=>{
-      if(!!response.success) dispatch(removeUnreadChat(chatId))
-    })
-  },[messages])
+  useEffect(() => {
+    socket.emit(
+      MARK_MESSAGES_READ,
+      { chatId, userId: user?.id },
+      (response) => {
+        if (!!response.success) dispatch(removeUnreadChat(chatId));
+      }
+    );
+  }, [messages]);
   return (
     <>
       {isLoading ? (
-        <><div className="flex items-center justify-center w-full h-full">
-          <Loader2 className="animate-spin " />
-          </div></>
+        <>
+          <div className="flex items-center justify-center w-full h-full">
+            <Loader2 className="animate-spin " />
+          </div>
+        </>
       ) : (
         <div
           onDragEnter={(e) => {
@@ -229,14 +243,14 @@ const Chat = ({ chatId, user }) => {
           }}
           onDragOver={(e) => {
             e.preventDefault(); // Necessary to allow dropping
-           }}
+          }}
           onDragLeave={(e) => {
             e.preventDefault();
             dragCounter.current -= 1; // Increment counter
             if (dragCounter.current === 0) {
               setDraggedOver(false);
             }
-           }}
+          }}
           onDrop={(e) => {
             e.preventDefault();
             setDraggedOver(false);
@@ -250,7 +264,7 @@ const Chat = ({ chatId, user }) => {
           className=" relative h-full w-full flex-col flex-1 "
         >
           {!chatDetailsLoading && (
-            <ChatHeader user={chatDetails?.members[0]?.user } />
+            <ChatHeader user={chatDetails?.members[0]?.user} />
           )}
           <DotPattern
             className={cn(
@@ -294,9 +308,15 @@ const Chat = ({ chatId, user }) => {
                     ></MessageComponent>
                   );
                 })}
-              <div ref={bottomRef} className="h-[0px] hidden w-0 z-50">hello</div>
+              <div ref={bottomRef} className="h-[0px] hidden w-0 z-50">
+              </div>
+              <ScrollBottomButton
+                containerRef={containerRef}
+                messages={[...oldMessages, ...messages]}
+              />
+
               {isFileMenu && (
-                <FileMenu chatId={chatId} fileMenuRef={fileMenuRef} />
+                <FileMenu chatId={chatId} isG fileMenuRef={fileMenuRef} />
               )}
             </div>
 

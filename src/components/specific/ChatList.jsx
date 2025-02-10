@@ -116,9 +116,9 @@ const ChatList = ({
 
   return (
     <>
-      <div className="w-full h-[calc(100%-2rem)] flex flex-col overflow-y-scroll scrollbar-hide justify-start">
+      <div className="w-full h-[calc(100%-2rem)] flex flex-col overflow-hidden scrollbar-hide justify-start">
         {/* Selection Buttons */}
-        <div className="py-3 font-mono border border-separate scrollbar-hide flex flex-row gap-4 pl-5 whitespace-nowrap">
+        <div className="py-3 font-mono border overflow-x-auto border-separate scrollbar-hide flex flex-row gap-4 pl-5 whitespace-nowrap">
           {["all", "Recent", "Favorites", "groups"].map((button) => (
             <button
               key={button}
@@ -138,6 +138,7 @@ const ChatList = ({
         </div>
 
         {/* Display Chat Items */}
+        <div className="overflow-y-auto w-full flex flex-col overflow-hidden scrollbar-hide justify-start">
         {chats.length === 0 ? (
           <div className="text-primary text-2xl text-center">
             No chats found
@@ -172,6 +173,7 @@ const ChatList = ({
             );
           })
         )}
+        </div>
       </div>
     </>
   );

@@ -11,6 +11,7 @@ const SearchInputWithDialog = () => {
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [selections, setSearchSelection] = useState("users")
   const [error, setError] = useState(null);
   // const [isOpen, setIsOpen] = useState(false);
   const {isSearchOpen} = useSelector((state)=>state.misc)
@@ -25,10 +26,10 @@ const SearchInputWithDialog = () => {
     setError(null);
     try {
       const response = await axios.get(
-        `${server}/api/v1/user/search?filter=${query}`,
+        selections === "users" ? `${server}/api/v1/user/search?filter=${query}`:`${server}/api/v1/group/search?filter=${query}`,
         { withCredentials: true }
       );
-      setOptions(response.data.users || []);
+      setOptions(response.data.users || response?.data?.groups);
     } catch (err) {
       setError("Failed to load options");
     } finally {
@@ -92,12 +93,18 @@ const SearchInputWithDialog = () => {
             )}
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
+        <div>
+          <div className="flex gap-4">
+            <div onClick={()=>setSearchSelection("users")} className={`${selections==="users" && "bg-muted"} test-sm px-2 py-1 border text-card-foreground border-border rounded-2xl hover:bg-muted`}>users</div>
+            <div onClick={()=>setSearchSelection("groups")} className={`${selections==="groups" && "bg-muted"} test-sm px-2 py-1 border text-card-foreground border-border rounded-2xl hover:bg-muted`}>Channels/Groups</div>
+          </div>
           <div className="mt-2 max-h-60 overflow-y-auto">
             {options.length > 0 ? (
               <ul>
                 {options.map((option, index) => (
                   <InputFieldItem
                     // selectedItem={selectedItem}
+                    selected={selections}
                     option={option}
                     index={index}
                   />
@@ -107,6 +114,7 @@ const SearchInputWithDialog = () => {
               !isLoading && <p className="text-secondary">No results found</p>
             )}
           </div>
+        </div>
         </DialogContent>
       </Dialog>
     </div>

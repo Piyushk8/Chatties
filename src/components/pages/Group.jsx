@@ -37,6 +37,8 @@ import { Loader2, Paperclip, SendIcon } from "lucide-react";
 import { DotPattern } from "../ui/dot-pattern";
 import { cn } from "@/lib/utils";
 import FileMenu from "../specific/FileMenu";
+import { removeUnreadChat } from "@/redux/reducers/chat";
+import ScrollBottomButton from "../shared/ScrollToBottom";
 const ChatDetailsSidebar = lazy(() => import("../specific/ProfileSideBar"));
 
 const GroupPage = ({ groupId, user }) => {
@@ -308,6 +310,10 @@ const GroupPage = ({ groupId, user }) => {
                   );
                 })}
               <div ref={bottomRef} className="h-[0px] hidden w-0 z-50"></div>
+              <ScrollBottomButton
+                containerRef={containerRef}
+                messages={[...oldMessages, ...messages]}
+              />
               {isFileMenu && (
                 <FileMenu groupId={groupId} fileMenuRef={fileMenuRef} />
               )}

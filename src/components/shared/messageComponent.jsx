@@ -8,8 +8,9 @@ const MessageComponent = ({ user, message ,group}) => {
   const { sender, content, attachment = [], createdAt } = message;
   const sameSender =  sender?.id === user?.id;
   const timeAgo = moment(createdAt).fromNow();
-
+  console.log(timeAgo)
   return (
+
     <div
       style={{
         marginBottom: "2px",
@@ -46,7 +47,7 @@ const MessageComponent = ({ user, message ,group}) => {
         </div>
       </div>
       <div className="self-end w-full h-fit text-[8px] p-0 text-[#B0B0B0] ${sameSender?`text-white bg-orange-500`:`bg-slate-200`}">
-        {sameSender ? `sent ${timeAgo}` : `${timeAgo}`}
+        {sameSender ? ` ${timeAgo}` : `${timeAgo}`}
       </div>
     </div>
   );
