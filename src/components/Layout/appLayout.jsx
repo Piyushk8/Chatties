@@ -203,7 +203,7 @@ const appLayout = () => (WrappedComponent) => {
             {isLoading && myGroupsLoading? (
               <ChatLoaders />
             ) : (
-              <div className="bg-card flex-shrink overflow-y-auto">
+              <div className="bg-card flex-grow overflow-y-auto">
                 <ChatList
                   handleDeleteChat={handleDeleteChat}
                   onlineUsers={onlineUsers}
