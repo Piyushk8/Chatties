@@ -64,7 +64,7 @@ const ChatDetailsSidebar = ({
 
   // Fetch attachments when media tab is opened
   useEffect(() => {
-    if (activeTab === "media" && (chat?.members?.chatId || groupDetails?.id)) {
+    if (activeTab === "media" && (chat?.members[0]?.chatId || groupDetails?.id)) {
       const fetchAttachments = async () => {
         try {
           const response = await axios.get(

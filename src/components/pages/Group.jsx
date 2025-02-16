@@ -45,7 +45,6 @@ const GroupPage = ({ groupId, user }) => {
   const { socket } = getSocket();
   const dispatch = useDispatch();
   const nav = useNavigate("/");
-  console.log(groupId);
   const [page, setPage] = useState(1);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);

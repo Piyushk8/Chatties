@@ -90,7 +90,6 @@ const ChatList = ({
 
   const groupHandler = () => {
     dispatch(setChatSelection("Groups"));
-    console.log("grou[s");
     const pinnedGroupsArray =
       myGroups?.filter((g) => pinnedChats?.includes(g?.group?.id)) || [];
     const nonPinnedGroupsArray =
@@ -145,7 +144,6 @@ const ChatList = ({
           </div>
         ) : (
           chats.map(({ chat, user, group }, index) => {
-            console.log(group)
             return chat ? (
               <ChatItem
                 key={index}
