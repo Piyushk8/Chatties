@@ -40,7 +40,6 @@ const FileMenu = memo(({ fileMenuRef, chatId ,groupId}) => {
 
   const fileChangeHandler = async (e, key) => {
     const files = Array.from(e.target.files);
-    console.log(files);
     if (files.length <= 0) return;
 
     if (files.length > 5)
@@ -59,7 +58,6 @@ const FileMenu = memo(({ fileMenuRef, chatId ,groupId}) => {
       files.forEach((file) => myForm.append("files", file));
 
       const res = await sendAttachments({data:myForm,IsGroup:IsGroup});
-      console.log(res.error)
       if (res.data) toast.success(`${key} sent successfully`, { id: toastId });
       else{
         toast.error(`Failed to send ${key}`, { id: toastId });

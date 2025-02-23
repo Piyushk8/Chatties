@@ -40,7 +40,7 @@ import Sidebar from "../specific/SideBar";
 import CreateGroupDialog from "../Dialogs/CreateGroupDialog";
 import GroupList from "../specific/groupList";
 import { GroupContextMenu } from "../Dialogs/groupContextMenu";
-import { setOnlineUsers } from "@/redux/reducers/auth";
+import { setOnlineUsers ,updateOnlineUsers} from "@/redux/reducers/auth";
 const ChatList = lazy(() => import("../specific/ChatList"));
 const DeleteChatMenu = lazy(() => import("../Dialogs/deleteChatMenu"));
 const appLayout = () => (WrappedComponent) => {
@@ -66,12 +66,11 @@ const appLayout = () => (WrappedComponent) => {
     const { user, onlineUsers } = useSelector((state) => state.auth);
     const { isChatList, isCreateGroup, isGroupMenuOpen, isDeleteMenu } =
       useSelector((state) => state.misc);
-    console.log("online users update", onlineUsers);
+
     const OnlineListener = useCallback(
       ({ onlineUsersIds: users }) => {
         refetch();
         dispatch(setOnlineUsers(users));
-        console.log("online users", users);
       },
       [refetch]
     );
@@ -101,8 +100,6 @@ const appLayout = () => (WrappedComponent) => {
     );
     const newGroupMessageHandler = useCallback(
       (data) => {
-        console.log("new grp messag alert ");
-        console.log(data);
         dispatch(updateUnreadCount(data));
         refetch();
       },
@@ -111,7 +108,7 @@ const appLayout = () => (WrappedComponent) => {
 
     const OnlineStatusChangeListener = useCallback(
       ({ userId, status }) => {
-        dispatch(updateUserStatus({ userId, status }));
+        dispatch(updateOnlineUsers({ userId, status }));
         refetch();
       },
       [dispatch, refetch]

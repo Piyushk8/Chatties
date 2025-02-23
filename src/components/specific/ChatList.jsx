@@ -5,7 +5,7 @@ import { setChatSelection, setUnreadChats } from "../../redux/reducers/chat";
 import GroupItem from "../shared/groupItem";
 import { MARK_MESSAGES_READ } from "@/constant/event";
 
-const ChatList = ({
+const ChatList = React.memo(({
   myGroups,
   groupId,
   chatData,
@@ -175,6 +175,6 @@ const ChatList = ({
       </div>
     </>
   );
-};
+});
 
 export default ChatList;

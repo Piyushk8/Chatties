@@ -24,7 +24,7 @@ export const authSlice = createSlice({
     setOnlineUsers:(state,action)=>{
       state.onlineUsers = action.payload
     },
-    updateUserStatus: (state, action) => {
+    updateOnlineUsers: (state, action) => {
       const { userId, status } = action.payload;
       if (status === "offline") {
         state.onlineUsers = state.onlineUsers.filter((id) => id !== userId);

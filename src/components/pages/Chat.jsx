@@ -198,12 +198,14 @@ const Chat = ({ chatId, user }) => {
   };
   useSocketEvents(socket, eventHandlers);
 
+  
   useEffect(() => {
-    if (bottomRef.current) {
-      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    if (containerRef.current) {
+      const event = new Event("scroll");
+      containerRef.current.dispatchEvent(event);
     }
-  }, [messages]);
-
+  }, [messages]); // Manually triggers the scroll event when messages update
+  
   useEffect(() => {
     // Reset all message-related states explicitly
     setpage(1); // Reset to first page

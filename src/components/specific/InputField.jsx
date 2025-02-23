@@ -34,7 +34,7 @@ const SearchInputWithDialog = () => {
           : `${server}/api/v1/group/search?filter=${query}`,
         { withCredentials: true }
       );
-
+      console.log(response)
       setOptions(response.data.users || response.data.groups);
     } catch (err) {
       setError("Failed to load options");
