@@ -38,7 +38,9 @@ export  const GroupContextMenu = ({anchor , socket}) => {
 //   }
   const handleExitGroup = async()=>{
     const res = await exitGroup({id:groupIdContextMenu})
-    console.log(res)
+    if(res.data.success === true){
+      nav("/")
+    }
   }
   const pinChatHandler =()=>{
     dispatch(setIsDeleteMenu(false));

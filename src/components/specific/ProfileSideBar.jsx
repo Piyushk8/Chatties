@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from "react";
-import { Info, Bell, Lock, Star } from "lucide-react";
+import { Info, Bell, Lock, Star, MoreVertical } from "lucide-react";
 import { Sheet, SheetContent, SheetHeader } from "@/components/ui/sheet";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "../ui/input";
@@ -10,6 +10,13 @@ import { getFileType } from "@/lib/utils";
 import MediaPreview from "./MediaPreview";
 import { setIsMediaPreview } from "@/redux/reducers/misc";
 import { useDispatch, useSelector } from "react-redux";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import { ContextMenuRender } from "./ContextMenuRender";
+
 
 const ChatDetailsSidebar = ({
   chat,
@@ -19,6 +26,7 @@ const ChatDetailsSidebar = ({
   onClose,
 }) => {
   const groupDetails = group?.groupDetails;
+  const userGroupMembership = group?.userGroupMembership[0];
   const groupMembers = group?.groupMembers || [];
   const [currentMembers, setCurrentMembers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -27,9 +35,8 @@ const ChatDetailsSidebar = ({
   const [attachments, setAttachments] = useState([]); // Moved state to the top
   const [previewUrl, setPreviewUrl] = useState(null);
   const [previewType, setPreviewType] = useState(null);
-   const {IsMediaPreview} = useSelector((state)=>state.misc)
-  const dispatch = useDispatch()
-
+  const { IsMediaPreview } = useSelector((state) => state.misc);
+  const dispatch = useDispatch();
 
   const name = chat?.members[0]?.user?.name || groupDetails?.groupname;
   const avatarImage =
@@ -64,7 +71,10 @@ const ChatDetailsSidebar = ({
 
   // Fetch attachments when media tab is opened
   useEffect(() => {
-    if (activeTab === "media" && (chat?.members[0]?.chatId || groupDetails?.id)) {
+    if (
+      activeTab === "media" &&
+      (chat?.members[0]?.chatId || groupDetails?.id)
+    ) {
       const fetchAttachments = async () => {
         try {
           const response = await axios.get(
@@ -86,12 +96,12 @@ const ChatDetailsSidebar = ({
     <div className="space-y-4 p-4 flex-1">
       <div className="flex flex-col items-center">
         <Avatar
-          onClick={() =>{
-            if(!avatarImage) return
-            setPreviewType("image")
-            setPreviewUrl(avatarImage)
-            dispatch(setIsMediaPreview(true))}
-          }
+          onClick={() => {
+            if (!avatarImage) return;
+            setPreviewType("image");
+            setPreviewUrl(avatarImage);
+            dispatch(setIsMediaPreview(true));
+          }}
           className="w-24 bg-card h-24 rounded-full"
         >
           <AvatarImage src={avatarImage} />
@@ -144,11 +154,11 @@ const ChatDetailsSidebar = ({
                   <div
                     key={index}
                     className="rounded-lg h-28 w-28 overflow-hidden"
-                    onClick={() =>{
-                      setPreviewType("image")
-                      setPreviewUrl(attachment[0])
-                      dispatch(setIsMediaPreview(true))}
-                    }
+                    onClick={() => {
+                      setPreviewType("image");
+                      setPreviewUrl(attachment[0]);
+                      dispatch(setIsMediaPreview(true));
+                    }}
                   >
                     <img
                       src={attachment[0]}
@@ -163,11 +173,11 @@ const ChatDetailsSidebar = ({
                   <div
                     key={index}
                     className="rounded-lg h-28 w-28 overflow-hidden"
-                    onClick={() =>{
-                      setPreviewType("video")
-                      setPreviewUrl(attachment[0])
-                      dispatch(setIsMediaPreview(true))}
-                    }
+                    onClick={() => {
+                      setPreviewType("video");
+                      setPreviewUrl(attachment[0]);
+                      dispatch(setIsMediaPreview(true));
+                    }}
                   >
                     <video
                       // height={100}
@@ -194,6 +204,70 @@ const ChatDetailsSidebar = ({
           <p className="text-center text-muted-foreground">
             No media available
           </p>
+        )}
+      </div>
+    );
+  };
+  const renderMembers = () => {
+    return (
+      <div className="p-4">
+        <Input
+          placeholder="Search members..."
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="mb-4"
+        />
+        {currentMembers.length > 0 ? (
+        <ul>
+        {currentMembers.map((member) => (
+          <ContextMenu key={member.user.id}>
+            <ContextMenuTrigger>
+              <li className="flex items-center p-2 my-2 bg-muted rounded-lg">
+                <Avatar className="w-10 h-10 mr-3">
+                  <AvatarImage
+                    src={member.user.avatar?.url || "/default-avatar.png"}
+                  />
+                  <AvatarFallback>{member.user.name?.[0] || "?"}</AvatarFallback>
+                </Avatar>
+                <div className="flex justify-between w-full">
+                  <div>
+                    <p className="text-primary font-medium">
+                      {member.user.name || "Unknown"}
+                    </p>
+                    <p className="text-muted-foreground text-sm">
+                      @{member.user.username || "unknown"}
+                    </p>
+                  </div>
+                  <div
+                    className={`${
+                      member.role === "member"
+                        ? "text-card-foreground"
+                        : "text-primary"
+                    } text-sm font-mono`}
+                  >
+                    {member.role === "superadmin" || member.role === "admin"
+                      ? "admin"
+                      : "member"}
+                  </div>
+                </div>
+              </li>
+            </ContextMenuTrigger>
+      
+            {/* ContextMenuContent must be inside ContextMenu */}
+            <ContextMenuContent>
+              <ContextMenuRender
+                userGroupMembership={userGroupMembership}
+                Member={member}
+                groupId={groupDetails.id}
+              />
+            </ContextMenuContent>
+          </ContextMenu>
+        ))}
+      </ul>
+      
+        
+        ) : (
+          <p className="text-center text-muted-foreground">No members found</p>
         )}
       </div>
     );
@@ -253,11 +327,12 @@ const ChatDetailsSidebar = ({
           <div className="flex-grow overflow-y-auto">
             {activeTab === "info" && renderInfoTab()}
             {activeTab === "media" && renderMediaTab()}
+            {activeTab === "members" && renderMembers()}
           </div>
         </div>
         {IsMediaPreview && (
-                      <MediaPreview url={previewUrl} mediaType={previewType} />
-                    )}
+          <MediaPreview url={previewUrl} mediaType={previewType} />
+        )}
       </SheetContent>
     </Sheet>
   );

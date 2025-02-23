@@ -14,7 +14,7 @@ const api = createApi({
     }),
     myGroups: builder.query({
       query: () => ({ url: "group/my", credentials: "include" }),
-      provideTags: ["Chats"],
+      provideTags: ["groups"],
       keepUnusedDataFor: 0,
     }),
     searchUser: builder.query({
@@ -58,14 +58,14 @@ const api = createApi({
       providesTags: ["message"],
     }),
     sendAttachments: builder.mutation({
-      query: ({data,IsGroup}) =>
+      query: ({ data, IsGroup }) =>
         IsGroup
-          ?                 {
-            url:`group/attachment`,
-            method:"post",
-            credentials:"include",
-            body:data,
-        }
+          ? {
+              url: `group/attachment`,
+              method: "post",
+              credentials: "include",
+              body: data,
+            }
           : {
               url: `chat/message`,
               method: "post",
@@ -73,7 +73,6 @@ const api = createApi({
               body: data,
             },
       invalidatesTags: ["message"],
-      
     }),
     createChat: builder.mutation({
       query: ({ userId }) => ({
@@ -110,10 +109,21 @@ const api = createApi({
     //     invalidatesTags:["user"]
 
     // })
+    joinGroup: builder.mutation({
+      query: ({ groupId ,check}) => ({
+        url: `/group/join/${groupId}`,
+        method: "POST",
+        body:{check},
+        credentials: "include",
+      }),
+    }),
   }),
 });
+
 export default api;
 export const {
+  useLazyMyGroupsQuery,
+  useJoinGroupMutation,
   useGetGroupMessagesQuery,
   useLeaveGroupMutation,
   useGroupDetailsQuery,

@@ -1,9 +1,16 @@
-import React, { Fragment, lazy, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
 import { useMyChatsQuery, useMyGroupsQuery } from "../../redux/reducers/api";
 import { getSocket } from "../../socket";
-import { motion } from "framer-motion"
+import { motion } from "framer-motion";
 import {
   InitialUsersStatus,
   MARK_MESSAGES_READ,
@@ -33,6 +40,7 @@ import Sidebar from "../specific/SideBar";
 import CreateGroupDialog from "../Dialogs/CreateGroupDialog";
 import GroupList from "../specific/groupList";
 import { GroupContextMenu } from "../Dialogs/groupContextMenu";
+import { setOnlineUsers } from "@/redux/reducers/auth";
 const ChatList = lazy(() => import("../specific/ChatList"));
 const DeleteChatMenu = lazy(() => import("../Dialogs/deleteChatMenu"));
 const appLayout = () => (WrappedComponent) => {
@@ -48,14 +56,22 @@ const appLayout = () => (WrappedComponent) => {
     const deleteOptionAnchor = useRef(null);
 
     const { data, isLoading, isError, error, refetch } = useMyChatsQuery();
-    const { data:groupData, isLoading:myGroupsLoading, isError:LoadingGroupsError, error:GroupQueryError, refetch:refetchGroups } = useMyGroupsQuery();
-    const { user } = useSelector((state) => state.auth);
-    const { isChatList, isCreateGroup ,isGroupMenuOpen,isDeleteMenu} = useSelector((state) => state.misc);
-
+    const {
+      data: groupData,
+      isLoading: myGroupsLoading,
+      isError: LoadingGroupsError,
+      error: GroupQueryError,
+      refetch: refetchGroups,
+    } = useMyGroupsQuery();
+    const { user, onlineUsers } = useSelector((state) => state.auth);
+    const { isChatList, isCreateGroup, isGroupMenuOpen, isDeleteMenu } =
+      useSelector((state) => state.misc);
+    console.log("online users update", onlineUsers);
     const OnlineListener = useCallback(
       ({ onlineUsersIds: users }) => {
-        setOnlineUsers(users);
         refetch();
+        dispatch(setOnlineUsers(users));
+        console.log("online users", users);
       },
       [refetch]
     );
@@ -78,44 +94,28 @@ const appLayout = () => (WrappedComponent) => {
       (data) => {
         // console.log("new messag alert ")
         // console.log(data)
-        dispatch(updateUnreadCount(data))
+        dispatch(updateUnreadCount(data));
         refetch();
       },
       [refetch]
     );
     const newGroupMessageHandler = useCallback(
       (data) => {
-        console.log("new grp messag alert ")
-        console.log(data)
-        dispatch(updateUnreadCount(data))
+        console.log("new grp messag alert ");
+        console.log(data);
+        dispatch(updateUnreadCount(data));
         refetch();
       },
       [refetch]
     );
 
-    const [onlineUsers, setOnlineUsers] = useState([]);
-
-    const OnlineStatusChangeListener = useCallback(({ userId, status }) => {
-      if (status === "offline") {
-        setOnlineUsers((prev) => {
-          if (!prev || prev.length === 0) return []; // Handle undefined or empty array
-          if (prev.includes(userId)) {
-            return prev.filter((id) => id !== userId);
-          }
-          return prev;
-        });
-      } else {
-        setOnlineUsers((prev) => {
-          if (!prev) return [userId]; // Handle undefined initial state
-          if (!prev.includes(userId)) {
-            return [...prev, userId];
-          }
-          return prev;
-        });
-      }
-
-      refetch(); // Ensure refetch is still called
-    }, []);
+    const OnlineStatusChangeListener = useCallback(
+      ({ userId, status }) => {
+        dispatch(updateUserStatus({ userId, status }));
+        refetch();
+      },
+      [dispatch, refetch]
+    );
 
     const eventHandlers = {
       [NEW_MESSAGE_ALERT]: newMessageAlertHandler,
@@ -129,11 +129,11 @@ const appLayout = () => (WrappedComponent) => {
 
     const handleDeleteChat = (e, _id, chatRef, groupChat) => {
       e.preventDefault();
-      console.log(_id,e,chatRef,groupChat,"herere")
+      console.log(_id, e, chatRef, groupChat, "herere");
       deleteOptionAnchor.current = e.currentTarget;
       deleteOptionAnchor.pageX = e.pageX;
       deleteOptionAnchor.pageY = e.pageY;
-      if(groupChat) {
+      if (groupChat) {
         dispatch(setGroupIdContextMenu(_id));
         return dispatch(setIsGroupMenuOpen(true));
       }
@@ -159,112 +159,120 @@ const appLayout = () => (WrappedComponent) => {
         window.addEventListener("click", handleClickOutside);
       }
       return () => {
-
         window.removeEventListener("click", handleClickOutside);
       };
     }, [isChatList]);
 
     return (
       <div className="h-screen w-100vw font-mono overflow-hidden">
-      {/* header */}
-      <Navbar />
-    
-      {isDeleteMenu && (
-        <DeleteChatMenu socket={socket} anchor={deleteOptionAnchor} />
-      )}
-      {isGroupMenuOpen && (
-        <GroupContextMenu socket={socket} anchor={deleteOptionAnchor} />
-      )}
-      {
-        isCreateGroup && (<CreateGroupDialog/>)
-      }
-    
-      {/* togglechatlist */}
-      <div className="md:hidden  shadow-2xl flex pl-4 h-[2rem] w-full">
-        <button
-          onClick={() => {
-            dispatch(setIsChatList());
-            dispatch(setChatSelection("all"));
-          }}
-        >
-          <MenuIcon ref={toggleButtonRef} size={20} className="text-foreground" />
-        </button>
-      </div>
-    
-      {isChatList && (
-        <motion.div
-          ref={chatListRef}
-          className="justify-between border border-border flex-col inset-x-1 z-30 shadow-2xl md:hidden fixed w-[75%] backdrop-blur-md h-[calc(100vh-6.5rem)] flex"
-        >
-          <div className="flex flex-col flex-grow overflow-hidden">
-            <div className="px-5 mt-2 mb-2">
-              <SearchInput />
-            </div>
-            {isLoading && myGroupsLoading? (
-              <ChatLoaders />
-            ) : (
-              <div className="bg-card flex-grow overflow-y-auto">
-                <ChatList
-                  handleDeleteChat={handleDeleteChat}
-                  onlineUsers={onlineUsers}
-                  chatId={chatId}
-                  chatData={data}
-                  myGroups={groupData?.myGroups}
-                  groupId={groupId}
-                />
-                {/* <GroupList
-                  handleDeleteChat={handleDeleteChat}
-                  groupId={groupId}
-                  groupData={myGroups}
-                /> */}
-              </div>
-            )}
-          </div>
-        </motion.div>
-      )}
-    
-      {/* MainArea */}
-      <div className="bg-background w-full h-[calc(100vh-7rem)] md:h-[calc(100vh-7rem)]">
-        <div className="md:h-full grid grid-cols-12">
-          {/* Left side - Search, Buttons, and Chat List */}
-          <div className="hidden bg-card overflow-hidden md:flex md:col-span-4 flex-col shadow-lg border-r border-primary-foreground">
-            {/* Search and Buttons - Fixed */}
-            <div className="flex-shrink-0 border border-separate">
-              <div className="px-4 py-2 ">
+        {/* header */}
+        <Navbar />
+
+        {isDeleteMenu && (
+          <DeleteChatMenu socket={socket} anchor={deleteOptionAnchor} />
+        )}
+        {isGroupMenuOpen && (
+          <GroupContextMenu socket={socket} anchor={deleteOptionAnchor} />
+        )}
+        {isCreateGroup && <CreateGroupDialog />}
+
+        {/* togglechatlist */}
+        <div className="md:hidden  shadow-2xl flex pl-4 h-[2rem] w-full">
+          <button
+            onClick={() => {
+              dispatch(setIsChatList());
+              dispatch(setChatSelection("all"));
+            }}
+          >
+            <MenuIcon
+              ref={toggleButtonRef}
+              size={20}
+              className="text-foreground"
+            />
+          </button>
+        </div>
+
+        {isChatList && (
+          <motion.div
+            ref={chatListRef}
+            className="justify-between border border-border flex-col inset-x-1 z-30 shadow-2xl md:hidden fixed w-[75%] backdrop-blur-md h-[calc(100vh-6.5rem)] flex"
+          >
+            <div className="flex flex-col flex-grow overflow-hidden">
+              <div className="px-5 mt-2 mb-2">
                 <SearchInput />
               </div>
-            </div>
-            {/* Scrollable ChatList */}
-            <div className="flex-grow overflow-hidden">
-              {isLoading && myGroupsLoading? (
+              {isLoading && myGroupsLoading ? (
                 <ChatLoaders />
               ) : (
-                <div className="h-full flex-shrink overflow-y-auto">
+                <div className="bg-card flex-grow overflow-y-auto">
                   <ChatList
                     handleDeleteChat={handleDeleteChat}
                     onlineUsers={onlineUsers}
                     chatId={chatId}
                     chatData={data}
-                    groupId={groupId}
                     myGroups={groupData?.myGroups}
+                    groupId={groupId}
                   />
+                  {/* <GroupList
+                  handleDeleteChat={handleDeleteChat}
+                  groupId={groupId}
+                  groupData={myGroups}
+                /> */}
                 </div>
               )}
             </div>
+          </motion.div>
+        )}
+
+        {/* MainArea */}
+        <div className="bg-background w-full h-[calc(100vh-7rem)] md:h-[calc(100vh-7rem)]">
+          <div className="md:h-full grid grid-cols-12">
+            {/* Left side - Search, Buttons, and Chat List */}
+            <div className="hidden bg-card overflow-hidden md:flex md:col-span-4 flex-col shadow-lg border-r border-primary-foreground">
+              {/* Search and Buttons - Fixed */}
+              <div className="flex-shrink-0 border border-separate">
+                <div className="px-4 py-2 ">
+                  <SearchInput />
+                </div>
+              </div>
+              {/* Scrollable ChatList */}
+              <div className="flex-grow overflow-hidden">
+                {isLoading && myGroupsLoading ? (
+                  <ChatLoaders />
+                ) : (
+                  <div className="h-full flex-shrink overflow-y-auto">
+                    <ChatList
+                      handleDeleteChat={handleDeleteChat}
+                      onlineUsers={onlineUsers}
+                      chatId={chatId}
+                      chatData={data}
+                      groupId={groupId}
+                      myGroups={groupData?.myGroups}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Side - Chat Page */}
+            <div className="col-span-12 md:col-span-8 flex flex-col h-[calc(100vh-6.3rem)] md:h-[calc(100vh-6.4rem)] shadow-md">
+              <WrappedComponent
+                user={user}
+                chatId={chatId}
+                groupId={groupId}
+                {...props}
+              />
+            </div>
           </div>
-    
-          {/* Right Side - Chat Page */}
-          <div className="col-span-12 md:col-span-8 flex flex-col h-[calc(100vh-6.3rem)] md:h-[calc(100vh-6.4rem)] shadow-md">
-            <WrappedComponent user={user} chatId={chatId} groupId={groupId} {...props} />
-          </div>
+          <Button
+            onClick={() => dispatch(setIsSideBarOpen(true))}
+            className="inset-x-1 z-30 bg-transparent backdrop-blur-2xl hover:bg-card ml-2 h-10 w-10 sticky bottom-2 left-0 rounded-full p-1"
+          >
+            <Settings size={20} className="text-primary" />
+          </Button>
+          <Sidebar user={user} />
         </div>
-        <Button onClick={()=>dispatch(setIsSideBarOpen(true))} className="inset-x-1 z-30 bg-transparent backdrop-blur-2xl hover:bg-card ml-2 h-10 w-10 sticky bottom-2 left-0 rounded-full p-1">
-          <Settings size={20} className="text-primary" />
-        </Button>
-        <Sidebar user={user}/>
       </div>
-    </div>
-    
     );
   };
 };

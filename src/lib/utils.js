@@ -6,7 +6,6 @@ export function cn(...inputs) {
 }
 
 export const getFileType = (url) => {
-  console.log(url)
   if(!url)return
   const extension = url.split('.').pop().split('?')[0].toLowerCase(); // Get file extension
 

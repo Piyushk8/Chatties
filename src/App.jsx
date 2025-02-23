@@ -28,7 +28,6 @@ const App = () => {
       dispatch(setIsAuthenticated(true))
       dispatch(setPinnedChatsArray(res?.data?.pinnedChats))
       dispatch(setMuteChatsArray(res?.data?.mutedChatIds))
-      console.log(res.data)
       return dispatch(userExists(res?.data?.user))
     }).catch((err)=>{
       dispatch(setIsAuthenticated(false))

@@ -18,12 +18,10 @@ const ChatItem = ({
   groupChat = false,
   sameSender,
   isOnline,
-  newMessageAlert,
   unreadCount,
   index = 0,
   handleDeleteChat,
 }) => {
-  const dispatch = useDispatch();
   const { pinnedChats, muteChats } = useSelector((state) => state.chat);
   const chatRef = useRef(null);
   const lastSeenTime = timeAgo(lastSeen);
