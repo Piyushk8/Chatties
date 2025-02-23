@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "../ui/input";
 import moment from "moment";
 import axios from "axios";
-import { server } from "@/constant/config";
+import { CLIENT_URL, server } from "@/constant/config";
 import { getFileType } from "@/lib/utils";
 import MediaPreview from "./MediaPreview";
 import { setIsMediaPreview } from "@/redux/reducers/misc";
@@ -16,6 +16,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { ContextMenuRender } from "./ContextMenuRender";
+import InviteLinkCopy from "./CopyLink";
 
 
 const ChatDetailsSidebar = ({
@@ -117,6 +118,10 @@ const ChatDetailsSidebar = ({
           <label className="text-primary text-lg w-fit">Name</label>
           <p className="bg-secondary rounded-2xl p-2">{name}</p>
         </div>
+        <div className="">
+          share this link to invite friends
+         <InviteLinkCopy groupId={groupDetails?.id}/>
+         </div>
 
         {!isGroup && (
           <>

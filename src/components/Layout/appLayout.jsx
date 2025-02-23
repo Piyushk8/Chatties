@@ -126,7 +126,6 @@ const appLayout = () => (WrappedComponent) => {
 
     const handleDeleteChat = (e, _id, chatRef, groupChat) => {
       e.preventDefault();
-      console.log(_id, e, chatRef, groupChat, "herere");
       deleteOptionAnchor.current = e.currentTarget;
       deleteOptionAnchor.pageX = e.pageX;
       deleteOptionAnchor.pageY = e.pageY;

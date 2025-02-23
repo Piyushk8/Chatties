@@ -38,7 +38,8 @@ export  const GroupContextMenu = ({anchor , socket}) => {
 //   }
   const handleExitGroup = async()=>{
     const res = await exitGroup({id:groupIdContextMenu})
-    if(res.data.success === true){
+    console.log(res)
+    if(res?.data?.success === true){
       nav("/")
     }
   }

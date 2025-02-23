@@ -110,10 +110,10 @@ const api = createApi({
 
     // })
     joinGroup: builder.mutation({
-      query: ({ groupId ,check}) => ({
+      query: ({ groupId ,invite,check}) => ({
         url: `/group/join/${groupId}`,
         method: "POST",
-        body:{check},
+        body:{check,invite},
         credentials: "include",
       }),
     }),

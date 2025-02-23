@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import appLayout from "../Layout/appLayout";
 import { useDispatch } from "react-redux";
 import { DotPattern } from "../ui/dot-pattern";
@@ -6,9 +6,20 @@ import { cn } from "@/lib/utils";
 import { BlurFade } from "../ui/blur-fade";
 import {motion} from "framer-motion"
 import { ThemeProvider, useTheme } from "../theme-provider";
+import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
+import InviteLinkJoinDialog from "../Dialogs/InviteLinkJoinDialog";
 function Home() {
-  const dispatch = useDispatch();
-  const {theme} = useTheme()
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.has("invite")) {
+      setIsDialogOpen(true);
+
+    }
+  }, [searchParams]);
+
   return (
     <div 
     className="relative  bg-card h-full flex justify-center items-center w-full">
@@ -38,6 +49,9 @@ function Home() {
           </div>
         </section>
       </div>
+      {isDialogOpen && (
+     <InviteLinkJoinDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} groupId={searchParams.get("group")}/>
+      )}
     </div>
   );
 }
