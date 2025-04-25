@@ -18,7 +18,6 @@ import {
 import { ContextMenuRender } from "./ContextMenuRender";
 import InviteLinkCopy from "./CopyLink";
 
-
 const ChatDetailsSidebar = ({
   chat,
   group,
@@ -113,16 +112,21 @@ const ChatDetailsSidebar = ({
       </div>
 
       <div className="space-y-2 bg-muted w-full min-h-60 p-2 rounded-2xl">
-        <div className="flex items-center flex-1 space-x-3">
-          <Info className="text-muted-foreground" />
-          <label className="text-primary text-lg w-fit">Name</label>
-          <p className="bg-secondary rounded-2xl p-2">{name}</p>
-        </div>
-        <div className="">
-          share this link to invite friends
-         <InviteLinkCopy groupId={groupDetails?.id}/>
-         </div>
-
+       {/* InviteLink */}
+        {isGroup && (
+          <>
+            <div className="flex items-center flex-1 space-x-3">
+              <Info className="text-muted-foreground" />
+              <label className="text-primary text-lg w-fit">Name</label>
+              <p className="bg-secondary rounded-2xl p-2">{name}</p>
+            </div>
+            <div className="">
+              share this link to invite friends
+              <InviteLinkCopy groupId={groupDetails?.id} />
+            </div>
+          </>
+        )}
+{/* Common Groups. */}
         {!isGroup && (
           <>
             <div className="flex items-center flex-1 space-x-3">
@@ -223,54 +227,54 @@ const ChatDetailsSidebar = ({
           className="mb-4"
         />
         {currentMembers.length > 0 ? (
-        <ul>
-        {currentMembers.map((member) => (
-          <ContextMenu key={member.user.id}>
-            <ContextMenuTrigger>
-              <li className="flex items-center p-2 my-2 bg-muted rounded-lg">
-                <Avatar className="w-10 h-10 mr-3">
-                  <AvatarImage
-                    src={member.user.avatar?.url || "/default-avatar.png"}
+          <ul>
+            {currentMembers.map((member) => (
+              <ContextMenu key={member.user.id}>
+                <ContextMenuTrigger>
+                  <li className="flex items-center p-2 my-2 bg-muted rounded-lg">
+                    <Avatar className="w-10 h-10 mr-3">
+                      <AvatarImage
+                        src={member.user.avatar?.url || "/default-avatar.png"}
+                      />
+                      <AvatarFallback>
+                        {member.user.name?.[0] || "?"}
+                      </AvatarFallback>
+                    </Avatar>
+                    <div className="flex justify-between w-full">
+                      <div>
+                        <p className="text-primary font-medium">
+                          {member.user.name || "Unknown"}
+                        </p>
+                        <p className="text-muted-foreground text-sm">
+                          @{member.user.username || "unknown"}
+                        </p>
+                      </div>
+                      <div
+                        className={`${
+                          member.role === "member"
+                            ? "text-card-foreground"
+                            : "text-primary"
+                        } text-sm font-mono`}
+                      >
+                        {member.role === "superadmin" || member.role === "admin"
+                          ? "admin"
+                          : "member"}
+                      </div>
+                    </div>
+                  </li>
+                </ContextMenuTrigger>
+
+                {/* ContextMenuContent must be inside ContextMenu */}
+                <ContextMenuContent>
+                  <ContextMenuRender
+                    userGroupMembership={userGroupMembership}
+                    Member={member}
+                    groupId={groupDetails.id}
                   />
-                  <AvatarFallback>{member.user.name?.[0] || "?"}</AvatarFallback>
-                </Avatar>
-                <div className="flex justify-between w-full">
-                  <div>
-                    <p className="text-primary font-medium">
-                      {member.user.name || "Unknown"}
-                    </p>
-                    <p className="text-muted-foreground text-sm">
-                      @{member.user.username || "unknown"}
-                    </p>
-                  </div>
-                  <div
-                    className={`${
-                      member.role === "member"
-                        ? "text-card-foreground"
-                        : "text-primary"
-                    } text-sm font-mono`}
-                  >
-                    {member.role === "superadmin" || member.role === "admin"
-                      ? "admin"
-                      : "member"}
-                  </div>
-                </div>
-              </li>
-            </ContextMenuTrigger>
-      
-            {/* ContextMenuContent must be inside ContextMenu */}
-            <ContextMenuContent>
-              <ContextMenuRender
-                userGroupMembership={userGroupMembership}
-                Member={member}
-                groupId={groupDetails.id}
-              />
-            </ContextMenuContent>
-          </ContextMenu>
-        ))}
-      </ul>
-      
-        
+                </ContextMenuContent>
+              </ContextMenu>
+            ))}
+          </ul>
         ) : (
           <p className="text-center text-muted-foreground">No members found</p>
         )}
