@@ -1,35 +1,14 @@
-import React, {
-  Fragment,
-  lazy,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { Fragment, lazy, useCallback, useEffect, useRef, useState } from "react";
 import appLayout from "../Layout/appLayout";
-import { useNavigate, useParams } from "react-router-dom";
-import {
-  useChatDetailsQuery,
-  useGetMessagesQuery,
-} from "../../redux/reducers/api";
+import { useNavigate } from "react-router-dom";
+import { useChatDetailsQuery, useGetMessagesQuery } from "../../redux/reducers/api";
 import MessageComponent from "../shared/messageComponent";
 import { useInfiniteScrollTop } from "../../hooks/hook";
-import {
-  NEW_MESSAGE,
-  NEW_MESSAGE_ALERT,
-  IS_TYPING,
-  STOP_TYPING,
-  REFETECH_CHATS,
-  MARK_MESSAGES_READ,
-} from "../../constant/event";
+import { NEW_MESSAGE, NEW_MESSAGE_ALERT, IS_TYPING, STOP_TYPING, REFETECH_CHATS, MARK_MESSAGES_READ } from "../../constant/event";
 import { useSocketEvents } from "../../hooks/hook";
 import { getSocket } from "../../socket";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  setIsChatDetailsBarOpen,
-  setIsFileMenu,
-  setUserTyping,
-} from "../../redux/reducers/misc";
+import { setIsChatDetailsBarOpen, setIsFileMenu, setUserTyping } from "../../redux/reducers/misc";
 import ChatHeader from "../Layout/ChatHeader";
 import { Loader2, Paperclip, SendIcon } from "lucide-react";
 import { DotPattern } from "../ui/dot-pattern";
@@ -37,13 +16,13 @@ import { cn } from "@/lib/utils";
 import FileMenu from "../specific/FileMenu";
 import { removeUnreadChat } from "@/redux/reducers/chat";
 import ScrollBottomButton from "../shared/ScrollToBottom";
-// import ChatDetailsSidebar from "../specific/ProfileSideBar";
-// const FileMenu = lazy(() => import("../specific/FileMenu"));
+
 const ChatDetailsSidebar = lazy(() => import("../specific/ProfileSideBar"));
+
 const Chat = ({ chatId, user }) => {
   const { socket } = getSocket();
   const dispatch = useDispatch();
-  const nav = useNavigate("/");
+  const nav = useNavigate();
 
   const [page, setpage] = useState(1);
   const [message, setMessage] = useState("");
@@ -54,7 +33,6 @@ const Chat = ({ chatId, user }) => {
   const containerRef = useRef(null);
   const fileMenuRef = useRef(null);
   const bottomRef = useRef(null);
-  const dropZoneRef = useRef(null);
   const dragCounter = useRef(0);
 
   const { userTyping, isFileMenu, isChatDetailsBarOpen } = useSelector(
@@ -69,13 +47,13 @@ const Chat = ({ chatId, user }) => {
   const members = chatDetails?.members.map((member) => member?.userId);
 
   useEffect(() => {
-    if (!chatDetails && !isLoading) {
+    if (!chatDetails && !chatDetailsLoading) {
       nav("/");
     }
-    if (chatDetailsIsError && !isLoading) {
+    if (chatDetailsIsError && !chatDetailsLoading) {
       nav("/");
     }
-  }, [chatDetails]);
+  }, [chatDetails, chatDetailsLoading, chatDetailsIsError, nav]);
 
   const {
     data,
@@ -94,46 +72,36 @@ const Chat = ({ chatId, user }) => {
     data?.totalMessages,
     page,
     setpage,
-    data?.messages
+    data?.messages,
+    false // Ascending order from server
   );
-  // console.log("chatDetails",chatDetails)
-  // console.log("Messsges",data?.messages)
 
-  const errorhandler = () => {
-    //error handling page logic
-  };
-
-  //DropZoneHandlers
-
-  //!all handlers
   const handleFileUpload = (files) => {
     const file = files[0];
-    // Implement your file upload logic here
     console.log(file);
   };
 
   const SubmitHandler = (e) => {
     e.preventDefault();
     if (!message.trim()) return;
-    //to emit message to server
-
     socket.emit(NEW_MESSAGE, { chatId, members, message });
     setMessage("");
   };
+
   const MessageOnChange = (e) => {
     e.preventDefault();
     setMessage(e.target.value);
-
     if (!MeTyping) {
       socket.emit(IS_TYPING, { members, chatId, userId: user?.id });
       setMeTyping(true);
     }
-    if (typingtimeOut) clearTimeout(typingtimeOut.current);
+    if (typingtimeOut.current) clearTimeout(typingtimeOut.current);
     typingtimeOut.current = setTimeout(() => {
       socket.emit(STOP_TYPING, { members, chatId });
       setMeTyping(false);
     }, 1500);
   };
+
   const openFileMenu = useCallback(
     (e) => {
       (fileMenuRef.pageX = e.pageX), (fileMenuRef.pageY = e.pageY);
@@ -142,7 +110,6 @@ const Chat = ({ chatId, user }) => {
     [dispatch]
   );
 
-  //!Event listner handlers
   const isTypingListener = useCallback(
     ({ data }) => {
       if (data.chatId !== chatId) return;
@@ -168,9 +135,11 @@ const Chat = ({ chatId, user }) => {
     [chatId]
   );
 
+  
+
   const AlertListener = useCallback(
     (content) => {
-      if (data.chatId !== chatId) return;
+      if (content.chatId !== chatId) return;
       const messageForAlert = {
         content,
         sender: {
@@ -185,10 +154,9 @@ const Chat = ({ chatId, user }) => {
   );
 
   const refetchChatDetailsListener = useCallback(() => {
-    console.log("heree");
     refetchChatDetails();
     if (!chatDetails) nav("/");
-  }, [chatId, refetchChatDetails]);
+  }, [chatId, refetchChatDetails, nav]);
 
   const eventHandlers = {
     [REFETECH_CHATS]: refetchChatDetailsListener,
@@ -198,57 +166,65 @@ const Chat = ({ chatId, user }) => {
   };
   useSocketEvents(socket, eventHandlers);
 
-  
   useEffect(() => {
     if (containerRef.current) {
       const event = new Event("scroll");
       containerRef.current.dispatchEvent(event);
     }
-  }, [messages]); // Manually triggers the scroll event when messages update
-  
-  useEffect(() => {
-    // Reset all message-related states explicitly
-    setpage(1); // Reset to first page
-    setMessages([]); // Clear current messages
-    setOldMessages([]); // Clear old messages
+  }, [messages]);
 
-    // Trigger fresh data fetching
+  useEffect(() => {
+    setpage(1);
+    setMessages([]);
+    setOldMessages([]);
     refetchMessages();
     refetchChatDetails();
-  }, [chatId]);
+  }, [chatId, refetchMessages, refetchChatDetails, setOldMessages]);
+
   useEffect(() => {
     socket.emit(
       MARK_MESSAGES_READ,
       { chatId, userId: user?.id },
       (response) => {
-        if (!!response.success) dispatch(removeUnreadChat(chatId));
+        if (response.success) dispatch(removeUnreadChat(chatId));
       }
     );
-  }, [messages]);
+  }, [messages, chatId, user?.id, dispatch, socket]);
+
+  useEffect(() => {
+    if (bottomRef.current) {
+      bottomRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages, oldMessages]);
+
+  useEffect(() => {
+    console.log("Messages:", {
+      oldMessages: oldMessages.map((m) => ({ id: m.id, createdAt: m.createdAt })),
+      messages: messages.map((m) => ({ id: m.id, createdAt: m.createdAt })),
+    });
+  }, [oldMessages, messages]);
+
   return (
     <>
       {isLoading ? (
-        <>
-          <div className="flex items-center justify-center w-full h-full">
-            <Loader2 className="animate-spin " />
-          </div>
-        </>
+        <div className="flex items-center justify-center w-full h-full">
+          <Loader2 className="animate-spin" />
+        </div>
       ) : (
         <div
           onDragEnter={(e) => {
-            e.preventDefault(); // Necessary to allow dropping
-            console.log("entered");
-            dragCounter.current += 1; // Increment counter
+            e.preventDefault();
+            dragCounter.current += 1;
             if (dragCounter.current === 1) {
               setDraggedOver(true);
             }
           }}
           onDragOver={(e) => {
-            e.preventDefault(); // Necessary to allow dropping
+            e.preventDefault();
           }}
           onDragLeave={(e) => {
             e.preventDefault();
-            dragCounter.current -= 1; // Increment counter
+            dragCounter.current -= 1;
             if (dragCounter.current === 0) {
               setDraggedOver(false);
             }
@@ -257,13 +233,12 @@ const Chat = ({ chatId, user }) => {
             e.preventDefault();
             setDraggedOver(false);
             dragCounter.current = 0;
-
             const files = e.dataTransfer.files;
             if (files.length > 0) {
               handleFileUpload(files);
             }
           }}
-          className=" relative h-full w-full flex-col flex-1 "
+          className="relative h-full w-full flex-col flex-1"
         >
           {!chatDetailsLoading && (
             <ChatHeader user={chatDetails?.members[0]?.user} />
@@ -271,17 +246,15 @@ const Chat = ({ chatId, user }) => {
           <DotPattern
             className={cn(
               "absolute",
-              "[mask-image:radial-gradient(250px_circle_at_center,gray,transparent)]" // Increased dot pattern size
+              "[mask-image:radial-gradient(250px_circle_at_center,gray,transparent)]"
             )}
           />
           <div
-            className={`flex flex-col justify-between border-box  flex-1 h-[calc(100%-3.7rem)]`}
+            className="flex flex-col justify-between border-box flex-1 h-[calc(100%-3.7rem)]"
           >
-            {/* chat area */}
-
             <div
               ref={containerRef}
-              className={`px-2 overflow-y-scroll flex flex-col scrollbar-none  pl-1 pr-2 md:pr-8 ${
+              className={`px-2 overflow-y-scroll flex flex-col scrollbar-none pl-1 pr-2 md:pr-8 ${
                 draggedOver ? "border-primary border-dashed border-2" : ""
               }`}
             >
@@ -291,44 +264,36 @@ const Chat = ({ chatId, user }) => {
                 </div>
               )}
               {messageSuccess &&
-                oldMessages?.map((message, index) => {
-                  return (
-                    <MessageComponent
-                      key={index}
-                      user={user}
-                      message={message}
-                    />
-                  );
-                })}
+                oldMessages?.map((message, index) => (
+                  <MessageComponent
+                    key={index}
+                    user={user}
+                    message={message}
+                  />
+                ))}
               {messageSuccess &&
-                messages?.map((message, index) => {
-                  return (
-                    <MessageComponent
-                      key={index}
-                      user={user}
-                      message={message}
-                    ></MessageComponent>
-                  );
-                })}
-              <div ref={bottomRef} className="h-[0px] hidden w-0 z-50">
-              </div>
+                messages?.map((message, index) => (
+                  <MessageComponent
+                    key={index}
+                    user={user}
+                    message={message}
+                  />
+                ))}
+              <div ref={bottomRef} className="h-[0px] hidden w-0 z-50"></div>
               <ScrollBottomButton
                 containerRef={containerRef}
                 messages={[...oldMessages, ...messages]}
               />
-
               {isFileMenu && (
-                <FileMenu chatId={chatId} isG fileMenuRef={fileMenuRef} />
+                <FileMenu chatId={chatId} fileMenuRef={fileMenuRef} />
               )}
             </div>
-
-            {/* send message area */}
-            <div className=" w-full bg-card border border-separate">
+            <div className="w-full bg-card border border-separate">
               <form
                 onSubmit={SubmitHandler}
                 className="flex flex-col justify-center h-full w-full"
               >
-                <div className="flex gap-1 py-5 px-6 relative items-center justify-around w-full ">
+                <div className="flex gap-1 py-5 px-6 relative items-center justify-around w-full">
                   <div
                     className="p-1 flex gap-1 w-full items-center relative"
                     ref={fileMenuRef}
@@ -336,15 +301,11 @@ const Chat = ({ chatId, user }) => {
                     <input
                       type="text"
                       placeholder="send..."
-                      className="border-primary-foreground text-slate-700 bg-gray-200 rounded-xl  h-10 w-[90%]"
+                      className="border-primary-foreground text-slate-700 bg-gray-200 rounded-xl h-10 w-[90%]"
                       onChange={MessageOnChange}
                       value={message}
                     />
-                    <div
-                      className="mr-1"
-                      ref={fileMenuRef}
-                      onClick={openFileMenu}
-                    >
+                    <div className="mr-1" onClick={openFileMenu}>
                       <Paperclip
                         size={28}
                         className="bg-primary-foreground rounded-2xl hover:bg-secondary p-1 text-primary"
