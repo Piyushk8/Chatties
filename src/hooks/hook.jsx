@@ -1,32 +1,43 @@
-import { useRef,useCallback,useEffect,useState } from "react";
-import toast from "react-hot-toast";
+import { useRef, useCallback, useEffect, useState } from "react";
+import { useToast } from "./use-toast";
 
 
 export const useAsyncMutation = (mutationHook) => {
   const [isLoading, setIsLoading] = useState(false);
   const [data, setData] = useState(null);
   const [mutate] = mutationHook();
+  const { toast } = useToast();
 
   const executeMutation = async (toastMessage, ...args) => {
     setIsLoading(true);
-    const toastId = toast.loading(toastMessage || "Updating data...");
+    toast({
+      title: "Updating",
+      description: toastMessage || "Updating data...",
+    });
 
     try {
       const res = await mutate(...args);
 
       if (res.data) {
-        toast.success(res?.data?.message || "Updated data successfully", {
-          id: toastId,
+        toast({
+          title: "Success",
+          description: res?.data?.message || "Updated data successfully",
         });
         setData(res.data);
       } else {
-        toast.error(res?.error?.data?.message || "Error updating data", {
-          id: toastId,
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: res?.error?.data?.message || "Error updating data",
         });
       }
     } catch (err) {
-      console.log(err);
-      toast.error("Something went wrong", { id: toastId });
+      console.error(err);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Something went wrong",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -35,34 +46,37 @@ export const useAsyncMutation = (mutationHook) => {
   return [executeMutation, isLoading, data];
 };
 
-
 export const useSocketEvents = (socket, handlers) => {
   useEffect(() => {
     Object.entries(handlers).forEach(([event, handler]) => {
-      if(socket) socket.on(event, handler);
+      if (socket) socket.on(event, handler);
     });
 
     return () => {
       Object.entries(handlers).forEach(([event, handler]) => {
-        if(socket) socket.off(event, handler);
+        if (socket) socket.off(event, handler);
       });
     };
   }, [socket, handlers]);
 };
 
-
 const useErrors = (errors = []) => {
+  const { toast } = useToast();
+
   useEffect(() => {
     errors.forEach(({ isError, error, fallback }) => {
       if (isError) {
         if (fallback) fallback();
-        else toast.error(error?.data?.message || "Something went wrong");
+        else
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: error?.data?.message || "Something went wrong",
+          });
       }
     });
-  }, [errors]);
+  }, [errors, toast]);
 };
-
-
 
 export const useInfiniteScrollTop = (
   containerRef,
@@ -113,7 +127,7 @@ export const useInfiniteScrollTop = (
       setData((oldData) => {
         const seen = new Set(oldData.map((i) => i.id));
         const newMessages = newData.filter((i) => !seen.has(i.id));
-        return [...newMessages, ...oldData]; // Prepend ascending-ordered messages
+        return [...newMessages, ...oldData];
       });
     }
 

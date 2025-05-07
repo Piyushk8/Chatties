@@ -5,7 +5,6 @@ import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import { server } from './constant/config'
 import { setIsAuthenticated, userExists, userNotExists } from './redux/reducers/auth'
-// import { Toaster } from 'react-hot-toast'
 import ProtectRoute from './components/auth/ProtectRoute'
 import MainLoader from './components/Layout/MainLoader'
 
@@ -13,7 +12,7 @@ import { Login } from './components/pages/Login'
 import { setMuteChatsArray, setPinnedChatsArray } from './redux/reducers/chat'
 import { ThemeProvider } from './components/theme-provider'
 import Group from './components/pages/Group'
-import { Toaster } from 'sonner'
+import { Toaster } from './components/ui/toaster'
 //const {Login} = lazy(()=>import('./components/pages/Login'))
 const Chat = lazy(()=>import('./components/pages/Chat'))
 const Home = lazy(()=>import('./components/pages/Home'))
@@ -71,8 +70,7 @@ const App = () => {
       </Suspense>
             </SocketProvider>
 
-      {/* <Toaster position="bottom-center" /> */}
-<Toaster position='bottom'/>
+      <Toaster/>
     </BrowserRouter>
     </ThemeProvider>
   );
