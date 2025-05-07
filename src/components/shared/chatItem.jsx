@@ -1,7 +1,7 @@
 import React, { memo, useReducer, useRef } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { motion } from "framer-motion";
+import {motion} from "motion/react"
 import userAvatar from "../../assets/userAvatar.jpg";
 import { timeAgo } from "../../lib/helper";
 import { setIsChatList } from "../../redux/reducers/misc";

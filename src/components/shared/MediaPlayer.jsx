@@ -12,8 +12,7 @@ export default function VideoPopup({ mediaSrc, onClose, MediaType }) {
   const sharedContainerClass =
     "fixed inset-0 z-50 bg-black flex items-center justify-center";
 
-  const closeButtonClass =
-    "absolute top-5 right-5 text-white text-3xl hover:scale-110 transition-transform z-50";
+  const closeButtonClass ="absolute top-3 right-3 z-50 p-1 rounded-full bg-white/80 shadow-md hover:scale-110 transition-transform backdrop-blur-md"
 
   const mediaWrapperClass =
     "relative max-w-full max-h-full w-[90%] h-[90%] flex items-center justify-center";

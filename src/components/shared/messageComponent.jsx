@@ -10,17 +10,18 @@ import {
   ContextMenuTrigger,
 } from "../ui/context-menu";
 import VideoPopup from "./MediaPlayer";
+import { timeAgo } from "@/lib/helper";
 
 const MessageComponent = ({ user, message, group }) => {
-  const [mediaActive, setMediaActive] = useState(false);
+  const [mediaActive, setMediaActive] = useState({ url: "", mediaType: "" } || null);
   const { sender, content, attachment = [], createdAt } = message;
   const sameSender = sender?.id === user?.id;
-  const timeAgo = moment(createdAt).fromNow();
-  console.log(mediaActive);
+  const time = timeAgo(createdAt);
+  
   const handleMediaActiveClose = () => {
-    setMediaActive(false);
-    console.log("here");
+    setMediaActive(null);
   };
+
   return (
     <div
       style={{
@@ -32,47 +33,46 @@ const MessageComponent = ({ user, message, group }) => {
       <ContextMenu>
         <ContextMenuTrigger>
           <div
-            className={`p-3 rounded-lg     my-0.5 md:mt-2  flex flex-col  min-h-11 h-fit ${
-              (sameSender
+            className={`rounded-lg my-0.5 md:mt-2 flex flex-col min-h-11 h-fit ${
+              sameSender
                 ? `text-primary-foreground bg-primary`
-                : `bg-secondary text-secondary-foreground`)
+                : `bg-secondary text-secondary-foreground`
             }`}
           >
-            {content ? <div>{content}</div> : ""}
-            <div className="">
-              {attachment?.length > 0 &&
-                attachment?.map((attachment, index) => {
+            {content ? <div className="p-3">{content}</div> : ""}
+            
+            {attachment?.length > 0 && (
+              <div className={`${attachment.length > 0 && !content ? "" : "mt-1"}`}>
+                {attachment?.map((attachment, index) => {
                   const url = attachment;
                   const mediaType = fileFormat(url);
-                  console.log(attachment,mediaType)
-                  // console.log(RenderContent(url,file));
                   return (
-                    <>
-                      <div key={index} onClick={() => setMediaActive(true)}>
-                        {/* <a
-                        href=""
-                        target="_blank"
-                        download
-                        style={{ color: "black" }}
-                      > */}
-                        {RenderContent({ url, mediaType })}
-                        {/* </a> */}
+                    <React.Fragment key={index}>
+                      <div
+                        className="w-full max-w-xs my-1 mx-auto cursor-pointer"
+                        onClick={() => setMediaActive({ url: url, mediaType: mediaType })}
+                      >
+                        <RenderContent url={url} mediaType={mediaType} sameSender={sameSender} />
                       </div>
                       {mediaActive && (
                         <VideoPopup
-                          mediaSrc={url}
-                          MediaType={mediaType}
+                          mediaSrc={mediaActive.url}
+                          MediaType={mediaActive.mediaType}
                           onClose={handleMediaActiveClose}
-                        ></VideoPopup>
+                        />
                       )}
-                    </>
+                    </React.Fragment>
                   );
                 })}
+              </div>
+            )}
+            
+            <div className="text-[10px] px-2 py-1 text-right opacity-70">
+              {time}
             </div>
           </div>
         </ContextMenuTrigger>
 
-        {/* ContextMenuContent must be inside ContextMenu */}
         <ContextMenuContent>
           <ContextMenuItem>Forward Message</ContextMenuItem>
           <ContextMenuItem>Edit Message</ContextMenuItem>
@@ -80,9 +80,6 @@ const MessageComponent = ({ user, message, group }) => {
           <ContextMenuItem>Delete for everyone</ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
-      <div className="self-end w-full h-fit text-[8px] p-0 text-[#B0B0B0] ${sameSender?`text-white bg-orange-500`:`bg-slate-200`}">
-        {sameSender ? ` ${timeAgo}` : `${timeAgo}`}
-      </div>
     </div>
   );
 };

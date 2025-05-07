@@ -39,6 +39,7 @@ import { cn } from "@/lib/utils";
 import FileMenu from "../specific/FileMenu";
 import { removeUnreadChat } from "@/redux/reducers/chat";
 import ScrollBottomButton from "../shared/ScrollToBottom";
+import MediaUploadDialog from "../specific/MediaUploadDialog";
 const ChatDetailsSidebar = lazy(() => import("../specific/ProfileSideBar"));
 
 const GroupPage = ({ groupId, user }) => {
@@ -46,6 +47,7 @@ const GroupPage = ({ groupId, user }) => {
   const dispatch = useDispatch();
   const nav = useNavigate("/");
   const [page, setPage] = useState(1);
+  const [filesToUpload, setFilesToUpload] = useState(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [meTyping, setMeTyping] = useState(false);
@@ -106,9 +108,36 @@ const GroupPage = ({ groupId, user }) => {
 
   //! all handlers
   const handleFileUpload = (files) => {
-    const file = files[0];
-    // Implement file upload logic here
-    console.log(file);
+    const ArrayFiles = Array.from(files);
+    const newPreviews = ArrayFiles.map((file) => {
+      const type = file.type.split("/")[0];
+      const url = URL.createObjectURL(file);
+      return {
+        file, // the actual File object
+        url,
+        type,
+        name: file.name,
+      };
+    });
+
+    setFilesToUpload(newPreviews);
+  };
+
+  const handleDiscardFilefromFiles = (indexToRemove) => {
+    console.log("before", filesToUpload);
+    setFilesToUpload((prev) =>
+      prev?.filter((i, index) => index !== indexToRemove)
+    );
+    if (filesToUpload.length === 0) setFilesToUpload(0);
+    console.log("after", filesToUpload);
+  };
+
+  const handleAddFiles = (files) => {
+    if (files.length === 0) return;
+    setFilesToUpload((prev) => {
+      const newFiles = Array.isArray(files) ? files : [files];
+      return prev ? [...prev, ...newFiles] : newFiles;
+    });
   };
 
   const submitHandler = (e) => {
@@ -217,7 +246,6 @@ const GroupPage = ({ groupId, user }) => {
     refetchGroupDetails();
   }, [groupId]);
 
-
   useEffect(() => {
     socket.emit(
       MARK_GROUP_MESSAGES_READ,
@@ -316,6 +344,16 @@ const GroupPage = ({ groupId, user }) => {
               {isFileMenu && (
                 <FileMenu groupId={groupId} fileMenuRef={fileMenuRef} />
               )}
+              {filesToUpload && (
+                <MediaUploadDialog
+                  filesToUpload={filesToUpload}
+                  onClose={() => setFilesToUpload(null)}
+                  groupId={groupId}
+                  onAddFiles={handleAddFiles}
+                  onDiscard={handleDiscardFilefromFiles}
+                />
+              )}
+
             </div>
 
             {/* send message area */}

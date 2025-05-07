@@ -2,20 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
 
-  
-  html,body{
-    margin:0;
-    padding:0;
-  }
-
-  * {
-    box-sizing: border-box;
+* {
+  box-sizing: border-box;
 }
 
 .glowing-card {
   background-color: hsl(var(--primary));
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.2);}
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1), 0 4px 10px rgba(0, 0, 0, 0.2);
+}
 
 @layer base {
   :root {
@@ -44,6 +44,12 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --error-bg: 0 100% 97%; /* #faebeb */
+    --error-text: 0 85% 30%; /* #991b1b */
+    --error-border: 0 85% 30%; /* same as text */
+    --success-bg: 140 80% 95%; /* #e6f9ec */
+    --success-text: 140 60% 25%; /* #14532d */
+    --success-border: 140 60% 25%; /* same as text */
   }
 
   .dark {
@@ -71,27 +77,30 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --move-goal-bg:216, 100%, 24%;
-    
+    --move-goal-bg: 216, 100%, 24%;
+    --error-bg-dark: 0 50% 5%; /* #1a0a0a */
+    --error-text-dark: 0 20% 86%; /* #e0dada */
+    --error-border-dark: 0 80% 6%; /* #260000 */
+    --success-bg-dark: 140 30% 8%; /* #0d1a12 */
+    --success-text-dark: 140 40% 80%; /* #bdeccf */
+    --success-border-dark: 140 50% 12%; /* #1a3320 */
   }
 }
 
 @layer base {
   * {
     @apply border-border;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
 }
-
-
 
 @layer base {
   * {
     @apply border-border outline-ring/50;
-    }
+  }
   body {
     @apply bg-background text-foreground;
-    }
+  }
 }

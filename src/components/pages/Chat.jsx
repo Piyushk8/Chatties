@@ -1,21 +1,51 @@
-import React, { Fragment, lazy, useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  Fragment,
+  lazy,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import appLayout from "../Layout/appLayout";
 import { useNavigate } from "react-router-dom";
-import { useChatDetailsQuery, useGetMessagesQuery } from "../../redux/reducers/api";
+import {
+  useChatDetailsQuery,
+  useGetMessagesQuery,
+} from "../../redux/reducers/api";
 import MessageComponent from "../shared/messageComponent";
 import { useInfiniteScrollTop } from "../../hooks/hook";
-import { NEW_MESSAGE, NEW_MESSAGE_ALERT, IS_TYPING, STOP_TYPING, REFETECH_CHATS, MARK_MESSAGES_READ } from "../../constant/event";
+import {
+  NEW_MESSAGE,
+  NEW_MESSAGE_ALERT,
+  IS_TYPING,
+  STOP_TYPING,
+  REFETECH_CHATS,
+  MARK_MESSAGES_READ,
+} from "../../constant/event";
 import { useSocketEvents } from "../../hooks/hook";
 import { getSocket } from "../../socket";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsChatDetailsBarOpen, setIsFileMenu, setUserTyping } from "../../redux/reducers/misc";
+import {
+  setIsChatDetailsBarOpen,
+  setIsFileMenu,
+  setUserTyping,
+} from "../../redux/reducers/misc";
 import ChatHeader from "../Layout/ChatHeader";
-import { Loader2, Paperclip, SendIcon } from "lucide-react";
+import { Loader2, Paperclip, SendIcon, X } from "lucide-react";
 import { DotPattern } from "../ui/dot-pattern";
 import { cn } from "@/lib/utils";
 import FileMenu from "../specific/FileMenu";
 import { removeUnreadChat } from "@/redux/reducers/chat";
 import ScrollBottomButton from "../shared/ScrollToBottom";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetPortal,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import MediaUploadDialog from "../specific/MediaUploadDialog";
 
 const ChatDetailsSidebar = lazy(() => import("../specific/ProfileSideBar"));
 
@@ -25,6 +55,8 @@ const Chat = ({ chatId, user }) => {
   const nav = useNavigate();
 
   const [page, setpage] = useState(1);
+
+  const [filesToUpload, setFilesToUpload] = useState(null);
   const [message, setMessage] = useState("");
   const [messages, setMessages] = useState([]);
   const [MeTyping, setMeTyping] = useState(false);
@@ -77,8 +109,21 @@ const Chat = ({ chatId, user }) => {
   );
 
   const handleFileUpload = (files) => {
-    const file = files[0];
-    console.log(file);
+    const ArrayFiles = Array.from(files);
+    const newPreviews = ArrayFiles.map((file) => {
+      const type = file.type.split("/")[0];
+      const url = URL.createObjectURL(file);
+      return {
+        file, // the actual File object
+        url,
+        type,
+        name: file.name,
+      };
+    });
+
+    setFilesToUpload(newPreviews);
+    console.log(filesToUpload);
+    
   };
 
   const SubmitHandler = (e) => {
@@ -134,8 +179,6 @@ const Chat = ({ chatId, user }) => {
     },
     [chatId]
   );
-
-  
 
   const AlertListener = useCallback(
     (content) => {
@@ -199,10 +242,30 @@ const Chat = ({ chatId, user }) => {
 
   useEffect(() => {
     console.log("Messages:", {
-      oldMessages: oldMessages.map((m) => ({ id: m.id, createdAt: m.createdAt })),
+      oldMessages: oldMessages.map((m) => ({
+        id: m.id,
+        createdAt: m.createdAt,
+      })),
       messages: messages.map((m) => ({ id: m.id, createdAt: m.createdAt })),
     });
   }, [oldMessages, messages]);
+
+  const handleDiscardFilefromFiles = (indexToRemove) => {
+    console.log("before", filesToUpload);
+    setFilesToUpload((prev) =>
+      prev?.filter((i, index) => index !== indexToRemove)
+    );
+    if (filesToUpload.length === 0) setFilesToUpload(0);
+    console.log("after", filesToUpload);
+  };
+
+  const handleAddFiles = (files) => {
+    if (files.length === 0) return;
+    setFilesToUpload((prev) => {
+      const newFiles = Array.isArray(files) ? files : [files];
+      return prev ? [...prev, ...newFiles] : newFiles;
+    });
+  };
 
   return (
     <>
@@ -249,9 +312,7 @@ const Chat = ({ chatId, user }) => {
               "[mask-image:radial-gradient(250px_circle_at_center,gray,transparent)]"
             )}
           />
-          <div
-            className="flex flex-col justify-between border-box flex-1 h-[calc(100%-3.7rem)]"
-          >
+          <div className="relative flex flex-col justify-between border-box flex-1 h-[calc(100%-3.7rem)]">
             <div
               ref={containerRef}
               className={`px-2 overflow-y-scroll flex flex-col scrollbar-none pl-1 pr-2 md:pr-8 ${
@@ -265,19 +326,11 @@ const Chat = ({ chatId, user }) => {
               )}
               {messageSuccess &&
                 oldMessages?.map((message, index) => (
-                  <MessageComponent
-                    key={index}
-                    user={user}
-                    message={message}
-                  />
+                  <MessageComponent key={index} user={user} message={message} />
                 ))}
               {messageSuccess &&
                 messages?.map((message, index) => (
-                  <MessageComponent
-                    key={index}
-                    user={user}
-                    message={message}
-                  />
+                  <MessageComponent key={index} user={user} message={message} />
                 ))}
               <div ref={bottomRef} className="h-[0px] hidden w-0 z-50"></div>
               <ScrollBottomButton
@@ -286,6 +339,16 @@ const Chat = ({ chatId, user }) => {
               />
               {isFileMenu && (
                 <FileMenu chatId={chatId} fileMenuRef={fileMenuRef} />
+              )}
+              {/* mediaPReview */}
+              {filesToUpload && (
+                <MediaUploadDialog
+                  filesToUpload={filesToUpload}
+                  onClose={() => setFilesToUpload(null)}
+                  chatId={chatId}
+                  onAddFiles={handleAddFiles}
+                  onDiscard={handleDiscardFilefromFiles}
+                />
               )}
             </div>
             <div className="w-full bg-card border border-separate">

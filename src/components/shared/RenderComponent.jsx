@@ -5,45 +5,48 @@ const transformImage = (url = "", width = 200) => {
   return url.replace("upload/", `upload/dpr_auto/w_${width}/`);
 };
 
-const RenderContent = ({ mediaType, url }) => {
+const RenderContent = ({ mediaType, url, sameSender }) => {
   switch (mediaType) {
     case "video":
       return (
-        <div className="relative flex justify-center items-center">
+        <div className={`p-2 relative w-full h-[95%] max-w-xs rounded-lg ${sameSender ? 'bg-opacity-90 bg-white/10' : 'bg-white/5'} flex items-center justify-center`}>
           <video
-            // preload="none"
-            width="160"
-            className=" rounded-lg w-fit max-w-[300px] shadow-sm object-cover"
+            className="rounded-lg w-full h-full object-contain hover:autoplay"
             src={url}
+            autoPlay="focus"
           />
-          <PlayCircleIcon className="absolute size-8 text-primary hover:scale-110 hover:animate-pulse hover:after:scale-90"/>
+          <PlayCircleIcon className="absolute size-10 text-white opacity-85 hover:scale-110 transition" />
         </div>
       );
 
     case "image":
       return (
-        <img
-          width="150"
-          height="100"
-          style={{ objectFit: "cover" }}
-          className="rounded-lg shadow-sm"
-          src={transformImage(url)}
-          alt="attachment"
-        />
+        <div className={`p-1 rounded-lg ${sameSender ? 'bg-opacity-90 bg-white/10' : 'bg-white/5'}`}>
+          <img
+            width="100%"
+            height="auto"
+            className="rounded-lg object-cover max-w-xs"
+            src={transformImage(url)}
+            alt="attachment"
+          />
+        </div>
       );
 
     case "audio":
       return (
-        <audio
-          src={url}
-          preload="auto"
-          className="rounded-md max-w-[300px] w-fit mt-1"
-        />
+        <div className={`p-2 rounded-lg ${sameSender ? 'bg-opacity-90 bg-white/10' : 'bg-white/5'}`}>
+          <audio
+            src={url}
+            preload="auto"
+            controls
+            className="rounded-md max-w-xs w-full"
+          />
+        </div>
       );
 
     default:
       return (
-        <div className="flex items-center justify-center">
+        <div className="flex items-center justify-center p-2">
           <label
             htmlFor="file-upload"
             className="cursor-pointer bg-[#075E54] text-white px-4 py-2 rounded-full text-sm hover:bg-[#0a7669] transition"
@@ -55,7 +58,6 @@ const RenderContent = ({ mediaType, url }) => {
             type="file"
             className="hidden"
             onChange={(e) => {
-              // Stub for onChange handler — replace this with your own
               console.log(e.target.files[0]);
             }}
           />

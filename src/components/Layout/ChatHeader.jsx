@@ -3,7 +3,7 @@ import React, { memo } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Settings2 } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 
 const ChatHeader = ({ user, group }) => {
   const dispatch = useDispatch();
@@ -55,10 +55,12 @@ const ChatHeader = ({ user, group }) => {
 };
 
 export default memo(ChatHeader, (prevProps, nextProps) => {
-  return prevProps.user?.id === nextProps.user?.id &&
-         prevProps.user?.name === nextProps.user?.name &&
-         prevProps.user?.avatar?.url === nextProps.user?.avatar?.url &&
-         prevProps.user?.isOnline === nextProps.user?.isOnline &&
-         prevProps.group?.groupname === nextProps.group?.groupname &&
-         prevProps.group?.groupImage === nextProps.group?.groupImage;
+  return (
+    prevProps.user?.id === nextProps.user?.id &&
+    prevProps.user?.name === nextProps.user?.name &&
+    prevProps.user?.avatar?.url === nextProps.user?.avatar?.url &&
+    prevProps.user?.isOnline === nextProps.user?.isOnline &&
+    prevProps.group?.groupname === nextProps.group?.groupname &&
+    prevProps.group?.groupImage === nextProps.group?.groupImage
+  );
 });
