@@ -168,7 +168,7 @@ const Login = () => {
                 </label>
                 <input
                   type="text"
-                  placeholder="Username"
+                  placeholder="Piyushk8"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   className="w-full text-gray-500 px-4 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
@@ -180,7 +180,7 @@ const Login = () => {
                 </label>
                 <input
                   type={passwordToggle ? "password" : "text"}
-                  placeholder="Password"
+                  placeholder="12345"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="w-full px-4 text-gray-500 py-2 mt-1 border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"

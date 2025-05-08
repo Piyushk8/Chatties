@@ -83,7 +83,10 @@ const ChatDetailsSidebar = ({
             }`,
             { withCredentials: true }
           );
-          setAttachments(response.data?.attachments);
+          console.log(response.data?.attachments);
+          const attachmentsArray = response.data?.attachments.flatMap((item) => item.attachment);
+console.log("flated",attachmentsArray)
+          setAttachments(attachmentsArray);
         } catch (error) {
           console.error("Error fetching attachments:", error);
         }
@@ -112,7 +115,7 @@ const ChatDetailsSidebar = ({
       </div>
 
       <div className="space-y-2 bg-muted w-full min-h-60 p-2 rounded-2xl">
-       {/* InviteLink */}
+        {/* InviteLink */}
         {isGroup && (
           <>
             <div className="flex items-center flex-1 space-x-3">
@@ -126,7 +129,7 @@ const ChatDetailsSidebar = ({
             </div>
           </>
         )}
-{/* Common Groups. */}
+        {/* Common Groups. */}
         {!isGroup && (
           <>
             <div className="flex items-center flex-1 space-x-3">
@@ -156,8 +159,8 @@ const ChatDetailsSidebar = ({
       <div className="p-4">
         {attachments.length > 0 ? (
           <div className="grid grid-cols-3 gap-2">
-            {attachments.map(({ attachment }, index) => {
-              const fileType = getFileType(attachment[0]);
+            {attachments.map((attachment, index) => {
+              const fileType = getFileType(attachment);
               if (fileType === "image") {
                 return (
                   <div
@@ -165,12 +168,12 @@ const ChatDetailsSidebar = ({
                     className="rounded-lg h-28 w-28 overflow-hidden"
                     onClick={() => {
                       setPreviewType("image");
-                      setPreviewUrl(attachment[0]);
+                      setPreviewUrl(attachment);
                       dispatch(setIsMediaPreview(true));
                     }}
                   >
                     <img
-                      src={attachment[0]}
+                      src={attachment}
                       alt="Attachment"
                       className="w-full h-auto rounded-lg"
                     />
@@ -184,14 +187,14 @@ const ChatDetailsSidebar = ({
                     className="rounded-lg h-28 w-28 overflow-hidden"
                     onClick={() => {
                       setPreviewType("video");
-                      setPreviewUrl(attachment[0]);
+                      setPreviewUrl(attachment);
                       dispatch(setIsMediaPreview(true));
                     }}
                   >
                     <video
                       // height={100}
                       // width={100}
-                      src={attachment[0]}
+                      src={attachment}
                       alt="Attachment"
                       autoPlay
                       className="w-full h-full rounded-lg"
