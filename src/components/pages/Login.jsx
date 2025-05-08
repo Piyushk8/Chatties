@@ -32,7 +32,8 @@ const Login = () => {
   useEffect(() => {
     toast({
       title: "Success",
-      className: "bg-green-100 text-green-800 border border-green-300 dark:bg-green-900 dark:text-green-200 dark:border-green-700",
+      className:
+        "bg-green-100 text-green-800 border border-green-300 dark:bg-green-900 dark:text-green-200 dark:border-green-700",
       description: "App loaded!",
     });
   }, []);
@@ -65,6 +66,7 @@ const Login = () => {
       dispatch(setIsAuthenticated(true));
       toast({
         title: "Success",
+        variant:"success",
         description: data.message,
       });
       navigate("/");
@@ -73,7 +75,7 @@ const Login = () => {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error?.response?.data?.message || "Some error occurred",
+        description: "Some error occurred",
       });
     } finally {
       setIsLoading(false);
@@ -105,19 +107,28 @@ const Login = () => {
           },
         }
       );
-      dispatch(userExists(data.user));
-      dispatch(setIsAuthenticated(true));
-      toast({
-        title: "Success",
-        description: data?.message || "Signup successful!",
-      });
-      navigate("/");
+      if (data.success) {
+        dispatch(userExists(res.data.user));
+        dispatch(setIsAuthenticated(true));
+        toast({
+          title: "Success",
+          description: "Signup successful!",
+        });
+        navigate("/");
+      }
+      if (!data?.success) {
+        toast({
+          variant:"",
+          title: "Error",
+          className:"border-primary text-primary bg-background",
+          description:data.message,
+        });
+      }
     } catch (error) {
-      console.error("Signup error:", error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: error?.response?.data?.message || "Some error occurred",
+        description: "Some error occurred",
       });
     }
   };
@@ -129,7 +140,6 @@ const Login = () => {
       const imgUrl = await fileToDataString(file);
       setPreviewImgUrl(imgUrl);
     } catch (error) {
-      console.error("File change error:", error);
       toast({
         variant: "destructive",
         title: "Error",

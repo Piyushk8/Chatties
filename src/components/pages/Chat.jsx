@@ -122,8 +122,6 @@ const Chat = ({ chatId, user }) => {
     });
 
     setFilesToUpload(newPreviews);
-    console.log(filesToUpload);
-    
   };
 
   const SubmitHandler = (e) => {
@@ -251,12 +249,10 @@ const Chat = ({ chatId, user }) => {
   }, [oldMessages, messages]);
 
   const handleDiscardFilefromFiles = (indexToRemove) => {
-    console.log("before", filesToUpload);
     setFilesToUpload((prev) =>
       prev?.filter((i, index) => index !== indexToRemove)
     );
     if (filesToUpload.length === 0) setFilesToUpload(0);
-    console.log("after", filesToUpload);
   };
 
   const handleAddFiles = (files) => {

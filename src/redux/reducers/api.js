@@ -9,12 +9,12 @@ const api = createApi({
   endpoints: (builder) => ({
     myChats: builder.query({
       query: () => ({ url: "chat/my", credentials: "include" }),
-      provideTags: ["Chats"],
+      providesTags: ["Chats"],
       keepUnusedDataFor: 0,
     }),
     myGroups: builder.query({
       query: () => ({ url: "group/my", credentials: "include" }),
-      provideTags: ["groups"],
+      providesTags: ["groups"],
       keepUnusedDataFor: 0,
     }),
     searchUser: builder.query({
@@ -116,13 +116,13 @@ const api = createApi({
         body:{check,invite},
         credentials: "include",
       }),
+      invalidatesTags: ["groups"], // Added to trigger refetch
     }),
   }),
 });
 
 export default api;
 export const {
-  useLazyMyGroupsQuery,
   useJoinGroupMutation,
   useGetGroupMessagesQuery,
   useLeaveGroupMutation,

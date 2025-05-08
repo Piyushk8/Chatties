@@ -4,8 +4,7 @@ import { server } from "@/constant/config";
 import { toast } from "sonner";
 
 export const ContextMenuRender = ({ groupId, userGroupMembership, Member }) => {
-  console.log(userGroupMembership, Member, groupId);
-
+  
   const handleKickMember = async () => {
     try {
         const res= await axios.post(
@@ -15,9 +14,7 @@ export const ContextMenuRender = ({ groupId, userGroupMembership, Member }) => {
               withCredentials: true,
             }
           );
-          console.log(res)
         } catch (error) {
-            console.log(error)
             toast("some error occured")
     }
   };

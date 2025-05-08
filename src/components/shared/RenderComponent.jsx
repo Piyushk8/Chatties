@@ -58,7 +58,7 @@ const RenderContent = ({ mediaType, url, sameSender }) => {
             type="file"
             className="hidden"
             onChange={(e) => {
-              console.log(e.target.files[0]);
+              // console.log(e.target.files[0]);
             }}
           />
         </div>

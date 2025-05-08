@@ -69,14 +69,14 @@ const GroupPage = ({ groupId, user }) => {
     isLoading: groupDetailsLoading,
   } = useGroupDetailsQuery({ id: groupId });
   const members = groupDetails?.groupMembers?.map((member) => member?.userId);
-
   useEffect(() => {
-    if (!groupDetails && !groupDetailsLoading) {
-      console.log(groupDetails, groupDetailsLoading);
+    if (
+      groupDetails?.userGroupMembership.length === 0 &&
+      !groupDetailsLoading
+    ) {
       nav("/");
     }
     if (groupDetailsIsError && !groupDetailsLoading) {
-      // console.log(groupDetails);
       nav("/");
     }
   }, [groupDetails]);
@@ -124,12 +124,10 @@ const GroupPage = ({ groupId, user }) => {
   };
 
   const handleDiscardFilefromFiles = (indexToRemove) => {
-    console.log("before", filesToUpload);
     setFilesToUpload((prev) =>
       prev?.filter((i, index) => index !== indexToRemove)
     );
     if (filesToUpload.length === 0) setFilesToUpload(0);
-    console.log("after", filesToUpload);
   };
 
   const handleAddFiles = (files) => {
@@ -176,7 +174,6 @@ const GroupPage = ({ groupId, user }) => {
   const isTypingListener = useCallback(
     (data) => {
       if (data.groupId !== groupId) return;
-      console.log(data, "is typing");
       dispatch(setUserTyping(true));
     },
     [groupId]
@@ -185,7 +182,6 @@ const GroupPage = ({ groupId, user }) => {
   const stopTypingListener = useCallback(
     ({ data }) => {
       if (data.groupId !== groupId) return;
-      console.log(data, "stopped");
       dispatch(setUserTyping(false));
     },
     [groupId]
@@ -217,7 +213,6 @@ const GroupPage = ({ groupId, user }) => {
   );
 
   const refetchGroupDetailsListener = useCallback(() => {
-    console.log("here");
     refetchGroupDetails();
     if (!groupDetails) nav("/");
   }, [groupId, refetchGroupDetails]);
@@ -266,7 +261,6 @@ const GroupPage = ({ groupId, user }) => {
         <div
           onDragEnter={(e) => {
             e.preventDefault(); // Necessary to allow dropping
-            console.log("entered");
             dragCounter.current += 1; // Increment counter
             if (dragCounter.current === 1) {
               setDraggedOver(true);
@@ -353,7 +347,6 @@ const GroupPage = ({ groupId, user }) => {
                   onDiscard={handleDiscardFilefromFiles}
                 />
               )}
-
             </div>
 
             {/* send message area */}

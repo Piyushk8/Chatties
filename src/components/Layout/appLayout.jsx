@@ -7,7 +7,7 @@ import React, {
   useState,
 } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { useMyChatsQuery, useMyGroupsQuery } from "../../redux/reducers/api";
 import { getSocket } from "../../socket";
 import { motion } from "framer-motion";
@@ -38,16 +38,19 @@ import { MenuIcon, Settings } from "lucide-react";
 import { Button } from "../ui/button";
 import Sidebar from "../specific/SideBar";
 import CreateGroupDialog from "../Dialogs/CreateGroupDialog";
-import GroupList from "../specific/groupList";
 import { GroupContextMenu } from "../Dialogs/groupContextMenu";
-import { setOnlineUsers ,updateOnlineUsers} from "@/redux/reducers/auth";
+import { setOnlineUsers, updateOnlineUsers } from "@/redux/reducers/auth";
 const ChatList = lazy(() => import("../specific/ChatList"));
 const DeleteChatMenu = lazy(() => import("../Dialogs/deleteChatMenu"));
+
+import InviteLinkJoinDialog from "../Dialogs/InviteLinkJoinDialog";
+
 const appLayout = () => (WrappedComponent) => {
   return (props) => {
     const { socket } = getSocket();
     const nav = useNavigate();
     const dispatch = useDispatch();
+    const [searchParams, setSearchParams] = useSearchParams();
     const params = useParams();
     const chatId = params.chatId;
     const groupId = params.groupId;
@@ -66,6 +69,7 @@ const appLayout = () => (WrappedComponent) => {
     const { user, onlineUsers } = useSelector((state) => state.auth);
     const { isChatList, isCreateGroup, isGroupMenuOpen, isDeleteMenu } =
       useSelector((state) => state.misc);
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
 
     const OnlineListener = useCallback(
       ({ onlineUsersIds: users }) => {
@@ -158,6 +162,13 @@ const appLayout = () => (WrappedComponent) => {
         window.removeEventListener("click", handleClickOutside);
       };
     }, [isChatList]);
+
+    //!for Invite link
+    useEffect(() => {
+      if (searchParams.has("invite")) {
+        setIsDialogOpen(true);
+      }
+    }, [searchParams]);
 
     return (
       <div className="h-screen w-100vw font-mono overflow-hidden">
@@ -267,6 +278,16 @@ const appLayout = () => (WrappedComponent) => {
             <Settings size={20} className="text-primary" />
           </Button>
           <Sidebar user={user} />
+        </div>
+        <div>
+          {isDialogOpen && (
+            <InviteLinkJoinDialog
+              onJoinSuccess={() => refetchGroups()}
+              open={isDialogOpen}
+              onOpenChange={setIsDialogOpen}
+              groupId={searchParams.get("groupId")}
+            />
+          )}
         </div>
       </div>
     );

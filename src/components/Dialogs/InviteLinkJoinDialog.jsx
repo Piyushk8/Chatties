@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useTransition, useCallback } from "react";
+import React, { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,84 +8,76 @@ import {
 } from "../ui/dialog";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Button } from "../ui/button";
-import axios from "axios";
-import { server } from "@/constant/config";
 import { Loader2 } from "lucide-react";
 import { timeAgo } from "@/lib/helper";
-import { toast } from "sonner";
-import { useJoinGroupMutation } from "@/redux/reducers/api";
+import {
+  useJoinGroupMutation,
+  useGroupDetailsQuery,
+} from "@/redux/reducers/api";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 const InviteLinkJoinDialog = ({ open, onOpenChange, groupId }) => {
-  const [groupInfo, setGroupInfo] = useState({
-    groupName: "",
-    groupCreated: "",
-    id: "",
-  });
-  const [joinGroup, { isLoading }] = useJoinGroupMutation();
-  const [Error, setError] = useState(null);
-  const [isPending, startTransition] = useTransition();
-  const nav = useNavigate()
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  const [joinGroup, { isLoading: isJoining }] = useJoinGroupMutation();
 
-  const fetchGroupDetails = useCallback(async () => {
-    if (!groupId) return;
+  // Fetch group details using RTK Query
+  const {
+    data,
+    error,
+    isLoading: isFetching,
+  } = useGroupDetailsQuery({ id: groupId }, { skip: !groupId });
 
-    startTransition(async () => {
-      try {
-        const res = await axios.get(
-          `${server}/api/v1/group/search?groupId=${groupId}`,
-          { withCredentials: true }
-        );
-        if (res?.data?.response?.success === false)
-          setError("Invalid Group Link");
-        setGroupInfo({
-          groupName: res.data.group?.groupname || "Unknown",
-          groupCreated: timeAgo(res.data.group?.createdAt) || "",
-          id: res.data.id || "",
-        });
-      } catch (error) {
-        console.error("Failed to fetch group info:", error);
-      }
-    });
-  }, [groupId]);
+  const groupInfo = {
+    groupName: data?.groupDetails?.groupname || "Unknown",
+    groupCreated: data?.groupDetails?.createdAt
+      ? timeAgo(data?.groupDetails?.createdAt)
+      : "",
+    id: data?.groupDetails?.id || "",
+  };
+
   const handleJoinGroup = async () => {
     try {
-      const toastId = toast.loading("Joining group...");
       const groupData = await joinGroup({
-        groupId: groupId,
-        invite:true,
-        join: true,
-      }).unwrap();
-      console.log(groupData)
-      if (groupData.success && !groupData?.isMember) {
-        console.log("here1")
-        toast.success("Joined successfully!");
-        nav(`/group/${group.id}`);
-    } 
-    if(groupData.success && groupData.isMember){
-        console.log("here")
-          toast.success("Already a member");
-          nav(`/group/${group.id}`);
-      }
-      
-      else {
-        toast.error("Something went wrong");
-      }
-      
+        groupId,
+        invite: true,
+        check: false,
+      }).unwrap(); toast({
+        title: "Success",
+        description: groupData.isMember
+          ? "Already a member"
+          : "Joined successfully",
+      });
+      setTimeout(() => navigate(`/group/${groupId}`), 500); // Delay navigation
     } catch (err) {
-      toast.error("Failed to join group");
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: err?.data?.message || "Failed to join group",
+      });
     } finally {
-        onOpenChange(false)
+      onOpenChange(false);
     }
   };
+
   useEffect(() => {
-    fetchGroupDetails();
-  }, [fetchGroupDetails]);
+    if (error) {
+      console.error("Fetch group details failed:", error);
+    }
+  }, [error]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      {Error ? (
-        "InValid or Expired Group Link"
+      {error ? (
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Error</DialogTitle>
+            <DialogDescription>
+              {error?.data?.message || "Failed to fetch group details"}
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
       ) : (
         <DialogContent>
           <DialogHeader>
@@ -95,7 +87,7 @@ const InviteLinkJoinDialog = ({ open, onOpenChange, groupId }) => {
             </DialogDescription>
           </DialogHeader>
 
-          {isPending ? (
+          {isFetching ? (
             <div className="flex justify-center">
               <Loader2 className="animate-spin w-10 h-10" />
             </div>
@@ -103,14 +95,23 @@ const InviteLinkJoinDialog = ({ open, onOpenChange, groupId }) => {
             <div className="flex flex-col items-center gap-4">
               <Avatar>
                 <AvatarFallback>
-                  {groupInfo.groupName.charAt(0).toUpperCase()}
+                  {groupInfo.groupName.charAt(0)?.toUpperCase() || "?"}
                 </AvatarFallback>
               </Avatar>
               <div className="text-lg font-semibold">{groupInfo.groupName}</div>
               <div className="text-sm text-gray-500">
                 Created: {groupInfo.groupCreated || "Unknown"}
               </div>
-              <Button onClick={handleJoinGroup}>Join</Button>
+              <Button
+                onClick={handleJoinGroup}
+                disabled={isJoining || isFetching}
+              >
+                {isJoining ? (
+                  <Loader2 className="animate-spin w-5 h-5" />
+                ) : (
+                  "Join"
+                )}
+              </Button>
             </div>
           )}
         </DialogContent>

@@ -34,7 +34,6 @@ const GroupItem = ({ group, index }) => {
 
   const handleJoinGroup = async () => {
     try {
-        console.log('clicked')
       const toastId = toast.loading("Joining group...");
       const groupData = await joinGroup({ groupId: group.id, join: true }).unwrap();
       if (groupData.success) {

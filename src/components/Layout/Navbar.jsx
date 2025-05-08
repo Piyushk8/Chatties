@@ -108,7 +108,6 @@ const Navbar = () => {
                       </DropdownMenuItem>
                       <DropdownMenuItem
                         onClick={() => {
-                          console.log("clicked");
                           return setTheme("light");
                         }}
                       >

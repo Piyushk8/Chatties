@@ -49,9 +49,7 @@ function Home() {
           </div>
         </section>
       </div>
-      {isDialogOpen && (
-     <InviteLinkJoinDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} groupId={searchParams.get("group")}/>
-      )}
+     
     </div>
   );
 }

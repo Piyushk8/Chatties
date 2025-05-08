@@ -8,7 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 const InputFieldItem = ({ option, index, selected }) => {
   const [createChat, { isLoading, isError, isSuccess }] =
     useCreateChatMutation();
-  console.log(option);
   const [creating, setCreating] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();

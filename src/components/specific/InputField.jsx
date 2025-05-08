@@ -34,7 +34,6 @@ const SearchInputWithDialog = () => {
           : `${server}/api/v1/group/search?filter=${query}`,
         { withCredentials: true }
       );
-      console.log(response)
       setOptions(response.data.users || response.data.groups);
     } catch (err) {
       setError("Failed to load options");
@@ -69,7 +68,10 @@ const SearchInputWithDialog = () => {
           placeholder="Search..."
           readOnly
         />
-        <SearchIcon size={20} className="text-primary absolute top-3 right-3 opacity-50" />
+        <SearchIcon
+          size={20}
+          className="text-primary absolute top-3 right-3 opacity-50"
+        />
       </div>
 
       <Dialog open={isSearchOpen} onOpenChange={handleDialogClose}>
@@ -85,7 +87,12 @@ const SearchInputWithDialog = () => {
               className="w-full bg-input p-2 border border-border rounded mb-2"
               placeholder="Type to search..."
             />
-            {isLoading && <Loader2 size={20} className="absolute right-3 top-3 animate-spin" />}
+            {isLoading && (
+              <Loader2
+                size={20}
+                className="absolute right-3 top-3 animate-spin"
+              />
+            )}
           </div>
           {error && <p className="text-red-500 text-sm">{error}</p>}
 
@@ -93,13 +100,17 @@ const SearchInputWithDialog = () => {
           <div className="flex gap-4">
             <div
               onClick={() => setSelection("users")}
-              className={`${selection === "users" && "bg-muted"} text-sm px-2 py-1 border text-card-foreground border-border rounded-2xl hover:bg-muted cursor-pointer`}
+              className={`${
+                selection === "users" && "bg-muted"
+              } text-sm px-2 py-1 border text-card-foreground border-border rounded-2xl hover:bg-muted cursor-pointer`}
             >
               Users
             </div>
             <div
               onClick={() => setSelection("groups")}
-              className={`${selection === "groups" && "bg-muted"} text-sm px-2 py-1 border text-card-foreground border-border rounded-2xl hover:bg-muted cursor-pointer`}
+              className={`${
+                selection === "groups" && "bg-muted"
+              } text-sm px-2 py-1 border text-card-foreground border-border rounded-2xl hover:bg-muted cursor-pointer`}
             >
               Groups
             </div>
@@ -111,7 +122,12 @@ const SearchInputWithDialog = () => {
               <ul>
                 {options.map((option, index) =>
                   selection === "users" ? (
-                    <InputFieldItem key={option.id} option={option} index={index} selected={selection} />
+                    <InputFieldItem
+                      key={option.id}
+                      option={option}
+                      index={index}
+                      selected={selection}
+                    />
                   ) : (
                     <GroupItem key={option.id} group={option} index={index} />
                   )

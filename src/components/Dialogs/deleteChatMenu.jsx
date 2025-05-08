@@ -30,7 +30,6 @@ const DeleteChatMenu = ({ anchor, socket }) => {
   );
   const { pinnedChats, muteChats } = useSelector((state) => state.chat);
   const { user } = useSelector((state) => state.auth);
-  console.log(isDeleteMenu, chatIdContextMenu, anchor);
 
   const chatId = chatIdContextMenu;
 
@@ -44,8 +43,6 @@ const DeleteChatMenu = ({ anchor, socket }) => {
 
   const handleDeleteChat = async () => {
     const res = await deleteChat({ id: chatId });
-    // nav("/")
-    console.log(res);
   };
   const pinChatHandler = () => {
     dispatch(setIsDeleteMenu(false));

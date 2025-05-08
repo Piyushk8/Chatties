@@ -75,7 +75,6 @@ const FileMenu = memo(({ fileMenuRef, chatId, groupId }) => {
           title: "Error",
           description: `Failed to send ${key}`,
         });
-        console.log(res.error);
       }
     } catch (error) {
       toast({
