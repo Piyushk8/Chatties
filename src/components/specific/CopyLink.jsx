@@ -6,7 +6,7 @@ import { Input } from "../ui/input";
 import {motion} from "framer-motion"
 const InviteLinkCopy = ({ groupId }) => {
     console.log(groupId)
-  const inviteLink =  `${CLIENT_URL}/?invite=true&groupId=${groupId}`
+  const inviteLink =  `${window.location.origin}/?invite=true&groupId=${groupId}`
           ;
   
   const [copied, setCopied] = useState(false);

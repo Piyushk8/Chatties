@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { memo, useState } from "react";
 import { fileFormat } from "../../lib/feature";
 import RenderContent from "./RenderComponent";
 import { useSelector } from "react-redux";
@@ -12,7 +12,7 @@ import {
 import VideoPopup from "./MediaPlayer";
 import { timeAgo } from "@/lib/helper";
 
-const MessageComponent = ({ user, message, group }) => {
+const MessageComponent = memo(({ user, message, group }) => {
   const [mediaActive, setMediaActive] = useState({ url: "", mediaType: "" } || null);
   const { sender, content, attachment = [], createdAt } = message;
   const sameSender = sender?.id === user?.id;
@@ -82,6 +82,6 @@ const MessageComponent = ({ user, message, group }) => {
       </ContextMenu>
     </div>
   );
-};
+});
 
 export default MessageComponent;

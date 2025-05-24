@@ -1,7 +1,6 @@
-import React, { useEffect, useReducer, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useDispatch, useSelector } from "react-redux";
-
-import { setIsDeleteMenu } from "../../redux/reducers/misc";
 import { useDeleteChatMutation } from "../../redux/reducers/api";
 import { useNavigate } from "react-router-dom";
 import {
@@ -10,149 +9,110 @@ import {
   setMuteChats,
   setPinnedChats,
 } from "../../redux/reducers/chat";
-import {
-  Bell,
-  BellOffIcon,
-  PinIcon,
-  PinOffIcon,
-  TrashIcon,
-} from "lucide-react";
-import { FaVolumeMute } from "react-icons/fa";
+import { Bell, BellOffIcon, PinIcon, PinOffIcon, TrashIcon } from "lucide-react";
+import { setIsDeleteMenu } from "@/redux/reducers/misc";
 
 const DeleteChatMenu = ({ anchor, socket }) => {
   const dispatch = useDispatch();
-  const dialogRef = useRef(null);
   const nav = useNavigate();
-
-  const [menuPosition, setMenuPosition] = useState(null);
-  const { isDeleteMenu, chatIdContextMenu } = useSelector(
-    (state) => state.misc
-  );
+  const menuRef = useRef(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+  const { isDeleteMenu, chatIdContextMenu } = useSelector((state) => state.misc);
   const { pinnedChats, muteChats } = useSelector((state) => state.chat);
   const { user } = useSelector((state) => state.auth);
-
   const chatId = chatIdContextMenu;
 
-  //hooks
-  const [deleteChat, { isError, isLoading, isSuccess }] =
-    useDeleteChatMutation();
+  const [deleteChat] = useDeleteChatMutation();
 
   useEffect(() => {
-    dialogRef.current = anchor.current;
-  }, [isDeleteMenu, chatIdContextMenu]);
+    if (anchor) {
+      setPosition({
+        left: Math.min(anchor.pageX, window.innerWidth - 200),
+        top: Math.min(anchor.pageY, window.innerHeight - 150),
+      });
+    }
+  }, [anchor]);
 
   const handleDeleteChat = async () => {
-    const res = await deleteChat({ id: chatId });
+    await deleteChat({ id: chatId });
+    dispatch(setIsDeleteMenu(false));
   };
+
   const pinChatHandler = () => {
+    socket.emit("pinChat", { pinned: true, userId: user.id, chatId });
+    dispatch(setPinnedChats(chatId));
     dispatch(setIsDeleteMenu(false));
-    socket.emit("pinChat", {
-      pinned: true,
-      isGroup: false,
-      userId: user.id,
-      chatId: chatIdContextMenu,
-    });
-    dispatch(setPinnedChats(chatIdContextMenu));
   };
+
   const unPinChatHandler = () => {
+    socket.emit("pinChat", { pinned: false, userId: user.id, chatId });
+    dispatch(deleteFromPinnedChats(chatId));
     dispatch(setIsDeleteMenu(false));
-    socket.emit("pinChat", {
-      pinned: false,
-      isGroup: false,
-      userId: user.id,
-      chatId: chatIdContextMenu,
-    });
-    dispatch(deleteFromPinnedChats(chatIdContextMenu));
   };
 
   const muteChatHandler = () => {
+    socket.emit("MUTECHAT", { mute: true, userId: user.id, chatId });
+    dispatch(setMuteChats(chatId));
     dispatch(setIsDeleteMenu(false));
-    socket.emit("MUTECHAT", {
-      mute: true,
-      isGroup: false,
-      userId: user.id,
-      chatId: chatIdContextMenu,
-    });
-    dispatch(setMuteChats(chatIdContextMenu));
   };
+
   const unMuteChatHandler = () => {
+    socket.emit("MUTECHAT", { mute: false, userId: user.id, chatId });
+    dispatch(deleteFromMuteChats(chatId));
     dispatch(setIsDeleteMenu(false));
-    socket.emit("MUTECHAT", {
-      mute: false,
-      isGroup: false,
-      userId: user.id,
-      chatId: chatIdContextMenu,
-    });
-    dispatch(deleteFromMuteChats(chatIdContextMenu));
+  };
+
+  const handleClickOutside = (e) => {
+    if (menuRef.current && !menuRef.current.contains(e.target)) {
+      dispatch(setIsDeleteMenu(false));
+    }
   };
 
   useEffect(() => {
-    const handleClickOutside = (e) => {
-      if (dialogRef.current && !dialogRef.current.contains(e.target)) {
-        // Dispatch action to close the menu
-        dispatch(setIsDeleteMenu(false));
-      }
-    };
-    // Attach the event listener
     window.addEventListener("click", handleClickOutside);
-
-    // Clean up the event listener when the component is unmounted or dialog is closed
     return () => {
       window.removeEventListener("click", handleClickOutside);
     };
-  }, [dispatch]);
-  return (
-    <>
-      <div
-        ref={dialogRef}
-        style={{
-          position: "fixed",
-          left: `${Math.min(anchor.pageX, window.innerWidth - 200)}px`,
-          top: `${Math.min(anchor.pageY, window.innerHeight - 150)}px`,
-        }}
-        className="bg-card shadow-lg rounded-lg z-50 text-card-foreground  border border-border "
-      >
-        <ul className="space-y-1 p-2 w-48">
-          {pinnedChats?.includes(chatIdContextMenu) ? (
-            <li
-              onClick={unPinChatHandler}
-              className="px-4 py-2 hover:bg-muted border-b-2 border-border cursor-pointer flex items-center gap-2"
-            >
-              <PinOffIcon size={15} /> <span>unpin</span>
-            </li>
-          ) : (
-            <li
-              onClick={pinChatHandler}
-              className="px-4 py-2 hover:bg-muted border-b-2 border-border  cursor-pointer flex items-center gap-2"
-            >
-              <PinIcon size={15} /> <span>Pin</span>
-            </li>
-          )}
-          {muteChats?.includes(chatIdContextMenu) ? (
-            <li
-              onClick={unMuteChatHandler}
-              className="px-4 py-2 hover:bg-muted border-b-2 border-border  cursor-pointer flex items-center gap-2"
-            >
-              <Bell size={15} /> <span>Unmute</span>
-            </li>
-          ) : (
-            <li
-              onClick={muteChatHandler}
-              className="px-4 py-2 hover:bg-muted border-b-2 border-border cursor-pointer flex items-center gap-2"
-            >
-              <BellOffIcon size={15} /> <span>Mute</span>
-            </li>
-          )}
-          <li
-            onClick={handleDeleteChat}
-            className="px-4 py-2 hover:bg-muted  text-red-500 cursor-pointer flex items-center gap-2"
-          >
-            <TrashIcon size={15} /> <span>Delete Chat</span>
+  }, []);
+
+  const menuContent = (
+    <div
+      ref={menuRef}
+      style={{
+        position: "fixed",
+        left: `${position.left}px`,
+        top: `${position.top}px`,
+        zIndex: 1000,
+      }}
+      className="bg-card shadow-lg rounded-lg text-card-foreground border border-border w-48"
+    >
+      <ul className="space-y-1 p-2">
+        {pinnedChats?.includes(chatId) ? (
+          <li onClick={unPinChatHandler} className="cursor-pointer flex items-center gap-2 p-2 hover:bg-muted">
+            <PinOffIcon size={15} /> Unpin
           </li>
-        </ul>
-      </div>
-    </>
+        ) : (
+          <li onClick={pinChatHandler} className="cursor-pointer flex items-center gap-2 p-2 hover:bg-muted">
+            <PinIcon size={15} /> Pin
+          </li>
+        )}
+        {muteChats?.includes(chatId) ? (
+          <li onClick={unMuteChatHandler} className="cursor-pointer flex items-center gap-2 p-2 hover:bg-muted">
+            <Bell size={15} /> Unmute
+          </li>
+        ) : (
+          <li onClick={muteChatHandler} className="cursor-pointer flex items-center gap-2 p-2 hover:bg-muted">
+            <BellOffIcon size={15} /> Mute
+          </li>
+        )}
+        <li onClick={handleDeleteChat} className="cursor-pointer flex items-center gap-2 p-2 text-red-500 hover:bg-muted">
+          <TrashIcon size={15} /> Delete Chat
+        </li>
+      </ul>
+    </div>
   );
+
+  return isDeleteMenu ? createPortal(menuContent, document.body) : null;
 };
 
 export default DeleteChatMenu;

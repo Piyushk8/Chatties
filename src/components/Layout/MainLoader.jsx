@@ -1,80 +1,147 @@
-import React from 'react'
-import ChatLoaders from './Loaders'
+import React, { useState, useEffect } from 'react';
+import { MessageCircle, Zap, Coffee } from 'lucide-react';
 
-const MainLoader = () => {
+const ChatAppLoader = () => {
+  const [loadingTime, setLoadingTime] = useState(0);
+  const [currentMessage, setCurrentMessage] = useState(0);
+  const [dots, setDots] = useState('');
+
+  // Messages that change based on loading time
+  const messages = [
+    {
+      icon: MessageCircle,
+      text: "Starting conversations...",
+      subtext: "Great things happen when people connect",
+      timeThreshold: 0
+    },
+    {
+      icon: Zap,
+      text: "Almost ready...",
+      subtext: "Every message is a new beginning",
+      timeThreshold: 3000
+    },
+    {
+      icon: Coffee,
+      text: "Taking a bit longer...",
+      subtext: "We're on Render - cold starts happen, but it's worth the wait!",
+      timeThreshold: 10000
+    }
+  ];
+
+  // Animated dots for loading text
+  useEffect(() => {
+    const dotsInterval = setInterval(() => {
+      setDots(prev => prev.length >= 3 ? '' : prev + '.');
+    }, 500);
+
+    return () => clearInterval(dotsInterval);
+  }, []);
+
+  // Track loading time and update messages
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLoadingTime(prev => {
+        const newTime = prev + 100;
+        
+        // Update message based on time threshold
+        const newMessageIndex = messages.findIndex((msg, index) => {
+          const nextMsg = messages[index + 1];
+          return newTime >= msg.timeThreshold && (!nextMsg || newTime < nextMsg.timeThreshold);
+        });
+        
+        if (newMessageIndex !== -1 && newMessageIndex !== currentMessage) {
+          setCurrentMessage(newMessageIndex);
+        }
+        
+        return newTime;
+      });
+    }, 100);
+
+    return () => clearInterval(timer);
+  }, [currentMessage]);
+
+  const CurrentIcon = messages[currentMessage].icon;
+
   return (
-    <div className='relative h-screen w-screen'>
-    {/* header */}
-        <div className='header flex justify-center items-center w-full bg-[#ffff] shadow-sm h-[4.3rem] md:h-[6.3rem]'>
-            <div className='bg-slate-100  h-[60%] w-[95%] flex justify-between'>
-                <div className='bg-slate-300 h-full w-20 p-4 flex justify-center items-center animate-pulse'></div>
-                <div className=' h-full w-20 p-4 flex justify-center items-center animate-pulse'></div>
-            </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-slate-900 dark:via-gray-600 dark:to-purple-950 flex items-center justify-center p-4">
+      <div className="text-center max-w-md mx-auto">
+        {/* Main Logo/Icon with Animation */}
+        <div className="relative mb-8">
+          <div className="w-20 h-20 mx-auto bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 rounded-full flex items-center justify-center shadow-lg animate-pulse">
+            <CurrentIcon className="w-10 h-10 text-white dark:text-gray-100" />
+          </div>
+          
+          {/* Animated Ring */}
+          <div className="absolute inset-0 w-20 h-20 mx-auto border-4 border-blue-200 dark:border-gray-700 rounded-full animate-spin">
+            <div className="absolute top-0 left-1/2 w-2 h-2 bg-blue-500 dark:bg-blue-400 rounded-full transform -translate-x-1/2 -translate-y-1/2"></div>
+          </div>
+          
+          {/* Outer Ring */}
+          <div className="absolute -inset-2 w-24 h-24 mx-auto border-2 border-purple-100 dark:border-purple-200 rounded-full animate-ping opacity-30 dark:opacity-40"></div>
         </div>
-        
-        {/* togglechatlist */}
-        <div className='md:hidden flex pl-4 h-[2rem] w-full animate-bounce '>
-            {/* <button ref={toggleButtonRef} onClick={()=>dispatch(setIsChatList())}>
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="size-6">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                </svg>
-             </button> */}
-             
-            </div>
-    {/* MainArea */}
-        <div className=' w-full h-[calc(100vh-6.4rem)]' >
-        <div className=' h-[100%] max-w-full pb-0 m-0 grid grid-cols-12  ' >
-        
-      
-        <div className="shadow-2xl hidden  md:col-span-4 md:flex flex-col">
-            {/* Search and Buttons */}
-                <div className=" w-full h-26 ">
-                    <div className=" px-4 pt-2 py-2 border-gray-100 border-b-2 ">
-                    
-                    </div>
-                    <div className="overflow-x-scroll mb-2 mt-2 bg-white scrollbar-none flex flex-row items-center justify-start gap-4 pl-5 ">
-                        <div className="px-2 h-5 w-14 bg-gray-100 rounded-full dark:bg-gray-300 animate-pulse transition duration-150 ease-in-out">
-                        </div>
-                        <div className="px-2 h-5 w-14 bg-gray-100 rounded-full dark:bg-gray-300 animate-pulse transition duration-150 ease-in-out">
-                        </div>
-                        <div className="px-2 h-5 w-14 bg-gray-100 rounded-full dark:bg-gray-300 animate-pulse transition duration-150 ease-in-out">
-                        </div>
-                        <div className="px-2 h-5 w-14 bg-gray-100 rounded-full dark:bg-gray-300 animate-pulse transition duration-150 ease-in-out">
-                        </div>
-                       
-                    </div>
-                </div>
-                {/* Scrollable ChatList */}
-             <ChatLoaders/>
-            </div>
-        
-        
-          {/* Right Side - Chat Page */}
-        <div className="ml-0.5 col-span-12 md:col-span-8 flex justify-between flex-col h-[calc(100vh-6.5rem)] ">
-            <header className='bg-gray-100 dark:bg-gray-200 h-[3.7rem] px-3 py-6 flex justify-between items-center pl-2 border-t-[1px] gap-5'>
-                <div className='flex items-center gap-3'>
-                    <div class="h-10 bg-gray-300 dark:bg-gray-400 animate-pulse  w-10 rounded-full ">
-                    </div>
-                </div>
-            </header>
-            <div className=' self-center justify-between items-end flex gap-2'>
-                 <div className='h-12 w-6 rounded-sm bg-gray-100 delay-1000 animate-pulse'></div>
-                 <div className='h-14 w-6 rounded-sm bg-gray-200 delay-1000 animate-pulse'></div>
-                 <div className='h-16 w-6 rounded-sm bg-gray-300 delay-1000 animate-pulse'></div>
-            </div>
-            <div className='h-14 w-full flex justify-center p-2 items-center bg-gray-100 animate-pulse dark:bg-gray-300'>
-                <div className='h-[60%] w-full  bg-gray-100'>
 
-                </div>
-            </div>
+        {/* Loading Text with Animated Transition */}
+        <div className="transition-all duration-500 ease-in-out">
+          <h2 className="text-2xl font-bold text-gray-800 dark:text-gray-100 mb-2">
+            {messages[currentMessage].text}
+            <span className="inline-block w-8 text-left">{dots}</span>
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed max-w-xs mx-auto">
+            {messages[currentMessage].subtext}
+          </p>
         </div>
-        
-        
-            </div>
 
+        {/* Progress Bar */}
+        <div className="mt-8 w-full max-w-xs mx-auto">
+          <div className="h-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+            <div 
+              className="h-full bg-gradient-to-r from-blue-500 to-purple-600 dark:from-blue-600 dark:to-purple-700 rounded-full transition-all duration-300 ease-out"
+              style={{
+                width: `${Math.min(100, (loadingTime / 15000) * 100)}%`,
+                animation: 'shimmer 2s infinite'
+              }}
+            ></div>
+          </div>
         </div>
-       </div>
-  )
-}
 
-export default MainLoader
+        {/* Floating Chat Bubbles Animation */}
+        <div className="absolute inset-0 pointer-events-none overflow-hidden">
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="absolute w-4 h-4 bg-blue-100 dark:bg-gray-700 rounded-full opacity-20 dark:opacity-30"
+              style={{
+                left: `${20 + (i * 15)}%`,
+                animationDelay: `${i * 0.5}s`,
+                animation: 'float 3s ease-in-out infinite'
+              }}
+            ></div>
+          ))}
+        </div>
+      </div>
+
+      <style jsx>{`
+        @keyframes float {
+          0%, 100% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-20px) rotate(10deg); }
+        }
+        
+        @keyframes shimmer {
+          0% { background-position: -200px 0; }
+          100% { background-position: 200px 0; }
+        }
+        
+        .animate-spin {
+          animation: spin 2s linear infinite;
+        }
+        
+        @keyframes spin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
+    </div>
+  );
+};
+
+export default ChatAppLoader;

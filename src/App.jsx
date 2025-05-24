@@ -13,11 +13,14 @@ import { setMuteChatsArray, setPinnedChatsArray } from './redux/reducers/chat'
 import { ThemeProvider } from './components/theme-provider'
 import Group from './components/pages/Group'
 import { Toaster } from './components/ui/toaster'
+import { useTheme } from './components/theme-provider'
 //const {Login} = lazy(()=>import('./components/pages/Login'))
 const Chat = lazy(()=>import('./components/pages/Chat'))
 const Home = lazy(()=>import('./components/pages/Home'))
-
 const App = () => {
+  const the = useTheme()
+  console.log(the)
+  the.setTheme("dark")
   const {user,Loader} = useSelector((state)=>state.auth)
   const dispatch = useDispatch();
 

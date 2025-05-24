@@ -85,7 +85,6 @@ const ChatDetailsSidebar = ({
           );
           console.log(response.data?.attachments);
           const attachmentsArray = response.data?.attachments.flatMap((item) => item.attachment);
-console.log("flated",attachmentsArray)
           setAttachments(attachmentsArray);
         } catch (error) {
           console.error("Error fetching attachments:", error);

@@ -311,20 +311,20 @@ const GroupPage = ({ groupId, user }) => {
                 </div>
               )}
               {messageSuccess &&
-                oldMessages?.map((message, index) => {
+                oldMessages?.map((message) => {
                   return (
                     <MessageComponent
-                      key={index}
+                      key={message.id}
                       user={user}
                       message={message}
                     />
                   );
                 })}
               {messageSuccess &&
-                messages?.map((message, index) => {
+                messages?.map((message) => {
                   return (
                     <MessageComponent
-                      key={index}
+                      key={message.id}
                       user={user}
                       message={message}
                     />

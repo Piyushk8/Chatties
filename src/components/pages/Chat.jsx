@@ -321,12 +321,12 @@ const Chat = ({ chatId, user }) => {
                 </div>
               )}
               {messageSuccess &&
-                oldMessages?.map((message, index) => (
-                  <MessageComponent key={index} user={user} message={message} />
+                oldMessages?.map((message) => (
+                  <MessageComponent key={message.id} user={user} message={message} />
                 ))}
               {messageSuccess &&
-                messages?.map((message, index) => (
-                  <MessageComponent key={index} user={user} message={message} />
+                messages?.map((message) => (
+                  <MessageComponent key={message.id} user={user} message={message} />
                 ))}
               <div ref={bottomRef} className="h-[0px] hidden w-0 z-50"></div>
               <ScrollBottomButton

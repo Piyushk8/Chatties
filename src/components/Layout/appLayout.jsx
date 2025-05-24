@@ -41,8 +41,7 @@ import CreateGroupDialog from "../Dialogs/CreateGroupDialog";
 import { GroupContextMenu } from "../Dialogs/groupContextMenu";
 import { setOnlineUsers, updateOnlineUsers } from "@/redux/reducers/auth";
 const ChatList = lazy(() => import("../specific/ChatList"));
-const DeleteChatMenu = lazy(() => import("../Dialogs/deleteChatMenu"));
-
+import DeleteChatMenu from "../Dialogs/deleteChatMenu";
 import InviteLinkJoinDialog from "../Dialogs/InviteLinkJoinDialog";
 
 const appLayout = () => (WrappedComponent) => {
